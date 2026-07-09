@@ -1,0 +1,16 @@
+{
+  "name": "今天吃什么 - 家庭点菜APP",
+  "short_name": "今天吃什么",
+  "description": "家庭/情侣的点菜工具，自建菜谱，一键生成采购清单",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFFAF5",
+  "theme_color": "#E88D5A",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>",
+      "sizes": "100x100",
+      "type": "image/svg+xml"
+    }
+  ]
+}
