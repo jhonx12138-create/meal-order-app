@@ -2,14 +2,9 @@ import React from 'react';
 import { useApp } from '../App';
 import DishCard from '../components/DishCard';
 
-/**
- * 点菜页面
- * Order page with category navigation, search bar, and dish grid
- */
 export default function OrderPage() {
-  const { dishes, activeCategory, setActiveCategory, setSearchOpen, CATEGORIES } = useApp();
+  const { dishes, activeCategory, setActiveCategory, CATEGORIES, banner } = useApp();
 
-  // Filter dishes by active category
   const filteredDishes =
     activeCategory === '全部'
       ? dishes
@@ -17,16 +12,15 @@ export default function OrderPage() {
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Search Bar */}
-      <div className="px-5 mb-3 flex-shrink-0">
-        <div
-          onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2 bg-cream rounded-btn px-4 py-2 cursor-pointer"
-        >
-          <span className="text-base text-muted">🔍</span>
-          <span className="text-sm text-muted flex-1">搜搜你家的菜谱…</span>
+      {/* Banner */}
+      {banner && (
+        <div className="px-5 pt-2 pb-2 flex-shrink-0">
+          <div
+            className="w-full aspect-[4/1] rounded-card bg-cover bg-center"
+            style={{ backgroundImage: `url(${banner})` }}
+          />
         </div>
-      </div>
+      )}
 
       {/* Category Navigation */}
       <div className="flex gap-2 overflow-x-auto px-5 pb-2 flex-shrink-0 hide-scrollbar">

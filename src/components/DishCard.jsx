@@ -1,10 +1,6 @@
 import React from 'react';
 import { useApp } from '../App';
 
-/**
- * 菜品卡片
- * Dish card displayed in 2-column grid
- */
 export default function DishCard({ dish }) {
   const { cart, toggleCartItem, openRecipeDetail } = useApp();
   const inCart = !!cart[dish.id];
@@ -25,8 +21,12 @@ export default function DishCard({ dish }) {
       className="bg-white rounded-card overflow-hidden cursor-pointer relative shadow-[0_2px_8px_rgba(0,0,0,0.04)] active:bg-[#faf7f2] transition-colors"
     >
       {/* Image / Emoji area */}
-      <div className="w-full aspect-square dish-img-bg flex items-center justify-center text-[40px]">
-        {dish.emoji || '🍽️'}
+      <div className="w-full aspect-square dish-img-bg flex items-center justify-center text-[40px] overflow-hidden">
+        {dish.photo ? (
+          <img src={dish.photo} alt={dish.name} className="w-full h-full object-cover" />
+        ) : (
+          dish.emoji || '🍽️'
+        )}
       </div>
 
       {/* Info */}

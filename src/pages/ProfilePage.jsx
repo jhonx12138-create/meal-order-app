@@ -2,20 +2,15 @@ import React, { useState, useCallback } from 'react';
 import Drawer from '@mui/material/Drawer';
 import { useApp } from '../App';
 
-/**
- * 个人资料页面
- * Profile page with avatar, nickname, kitchen name editing
- */
 export default function ProfilePage() {
-  const { user, updateUser } = useApp();
+  const { user, updateUser, banner, updateBanner } = useApp();
 
-  // Edit states
-  const [editField, setEditField] = useState(null); // 'nickname' | 'kitchen' | 'avatar'
+  const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState('');
 
   const openEdit = useCallback((field, currentValue) => {
     setEditField(field);
-    setEditValue(currentValue);
+    setEditValue(currentValue || '');
   }, []);
 
   const closeEdit = useCallback(() => {
@@ -39,12 +34,20 @@ export default function ProfilePage() {
     closeEdit();
   }, [editField, editValue, updateUser, closeEdit]);
 
-  // Avatar emoji options
+  const handleBannerUpload = useCallback((e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      updateBanner(evt.target.result);
+    };
+    reader.readAsDataURL(file);
+  }, [updateBanner]);
+
   const avatarOptions = ['🦊', '🐱', '🐶', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🦄', '🐙', '🦀', '🦋', '🌸'];
 
   return (
     <div className="flex-1 overflow-y-auto px-5 pt-5 pb-4 hide-scrollbar">
-      {/* Avatar & Name */}
       <div className="flex flex-col items-center mb-8">
         <div
           onClick={() => openEdit('avatar', user.avatar)}
@@ -57,7 +60,6 @@ export default function ProfilePage() {
         <div className="text-xs text-brown-light text-center mt-1">{user.kitchenName || '我的厨房'}</div>
       </div>
 
-      {/* Settings */}
       <div
         onClick={() => openEdit('nickname', user.nickname)}
         className="flex justify-between items-center py-4 border-b border-cream text-sm text-brown cursor-pointer"
@@ -88,12 +90,33 @@ export default function ProfilePage() {
         <span className="text-base text-muted">›</span>
       </div>
 
+      <label className="flex justify-between items-center py-4 border-b border-cream text-sm text-brown cursor-pointer">
+        <span>首页头图</span>
+        <span className="flex items-center gap-2">
+          {banner ? (
+            <span className="text-xs text-coral">已设置</span>
+          ) : (
+            <span className="text-xs text-muted">未设置</span>
+          )}
+          <span className="text-base text-muted">›</span>
+        </span>
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleBannerUpload}
+        />
+      </label>
+
+      {banner && (
+        <div className="mt-2 mb-2 rounded-card overflow-hidden aspect-[4/1] bg-cover bg-center" style={{ backgroundImage: `url(${banner})` }} />
+      )}
+
       <div className="flex justify-between items-center py-4 border-b border-cream text-sm text-brown">
         <span>关于今天吃什么</span>
         <span className="text-xs text-muted">v1.0</span>
       </div>
 
-      {/* Edit Drawer */}
       <Drawer
         anchor="bottom"
         open={!!editField}

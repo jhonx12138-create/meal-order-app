@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
   meals: 'meal_app_meals',
   orders: 'meal_app_orders',
   user: 'meal_app_user',
+  banner: 'meal_app_banner',
   initialized: 'meal_app_initialized',
 };
 
@@ -40,6 +41,7 @@ export function initializeData() {
     meals: loadMeals(),
     orders: loadOrders(),
     user: loadUser(),
+    banner: loadBanner(),
   };
 }
 
@@ -111,6 +113,20 @@ export function loadUser() {
 
 export function saveUser(user) {
   localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+}
+
+/** 头图 (Banner) */
+export function loadBanner() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.banner);
+    return data || null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveBanner(banner) {
+  localStorage.setItem(STORAGE_KEYS.banner, banner);
 }
 
 /** 重置所有数据（调试用） */

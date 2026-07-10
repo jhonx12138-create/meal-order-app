@@ -8,6 +8,7 @@ import {
   saveMeals,
   saveOrders,
   saveUser,
+  saveBanner,
 } from './data/store';
 import { CATEGORIES, CAT_FOODS, DEFAULT_USER } from './data/defaults';
 import TabBar from './components/TabBar';
@@ -110,6 +111,7 @@ export default function App() {
   const [meals, setMeals] = useState([]);
   const [orders, setOrders] = useState([]);
   const [user, setUser] = useState(DEFAULT_USER);
+  const [banner, setBanner] = useState(null);
   const [activeTab, setActiveTab] = useState(TABS.ORDER);
   const [activeCategory, setActiveCategory] = useState('全部');
   const [toastMsg, setToastMsg] = useState('');
@@ -132,6 +134,7 @@ export default function App() {
     setMeals(data.meals);
     setOrders(data.orders);
     setUser(data.user);
+    setBanner(data.banner);
   }, []);
 
   // ─── Persistence ────────────────────────────────────────────
@@ -147,6 +150,7 @@ export default function App() {
   useEffect(() => { saveMeals(meals); }, [meals]);
   useEffect(() => { saveOrders(orders); }, [orders]);
   useEffect(() => { saveUser(user); }, [user]);
+  useEffect(() => { if (banner) saveBanner(banner); }, [banner]);
 
   // ─── Toast ──────────────────────────────────────────────────
   const showToast = useCallback((msg) => {
@@ -426,6 +430,14 @@ export default function App() {
     [showToast]
   );
 
+  const updateBanner = useCallback(
+    (bannerData) => {
+      setBanner(bannerData);
+      showToast('头图已更新');
+    },
+    [showToast]
+  );
+
   // ─── Search Results ─────────────────────────────────────────
   const searchDishes = useCallback(
     (query) => {
@@ -448,6 +460,7 @@ export default function App() {
     meals,
     orders,
     user,
+    banner,
     activeTab,
     activeCategory,
     // Constants
@@ -502,6 +515,7 @@ export default function App() {
     deleteMeal,
     // User
     updateUser,
+    updateBanner,
   };
 
   // ─── Render ─────────────────────────────────────────────────
