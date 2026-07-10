@@ -5,6 +5,29 @@ import { CATEGORIES } from '../data/defaults';
 
 const FILTERED_CATEGORIES = CATEGORIES.filter((c) => c !== '全部');
 
+/** Canvas压缩图片，限制最大宽度600px，质量0.7 */
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 600;
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function RecipeForm({ onSave }) {
   const { recipeFormOpen, setRecipeFormOpen, editingDish } = useApp();
 
@@ -58,14 +81,17 @@ export default function RecipeForm({ onSave }) {
     fileInputRef.current?.click();
   }, []);
 
-  const handlePhotoChange = useCallback((e) => {
+  const handlePhotoChange = useCallback(async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      setPhoto(evt.target.result);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file);
+      setPhoto(compressed);
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (evt) => setPhoto(evt.target.result);
+      reader.readAsDataURL(file);
+    }
   }, []);
 
   const handleSave = useCallback(() => {
@@ -187,25 +213,24 @@ export default function RecipeForm({ onSave }) {
               食材清单
             </label>
             {ingredients.map((ing, idx) => (
-              <div key={idx} className="flex gap-2 mb-2 items-center">
+              <div key={idx} className="flex gap-2 mb-2 items-center min-w-0">
                 <input
                   type="text"
                   value={ing.name}
                   onChange={(e) => updateIngredient(idx, 'name', e.target.value)}
                   placeholder="食材名称"
-                  className="flex-[2] px-3.5 py-2.5 border-[1.5px] border-cream-dark rounded-[10px] text-sm text-brown bg-white outline-none focus:border-coral placeholder:text-muted"
+                  className="min-w-0 flex-[2] px-2.5 py-2.5 border-[1.5px] border-cream-dark rounded-[10px] text-sm text-brown bg-white outline-none focus:border-coral placeholder:text-muted"
                 />
                 <input
                   type="text"
                   value={ing.amount}
                   onChange={(e) => updateIngredient(idx, 'amount', e.target.value)}
                   placeholder="用量"
-                  className="flex-1 px-3.5 py-2.5 border-[1.5px] border-cream-dark rounded-[10px] text-sm text-brown bg-white outline-none focus:border-coral placeholder:text-muted"
+                  className="min-w-0 flex-1 px-2.5 py-2.5 border-[1.5px] border-cream-dark rounded-[10px] text-sm text-brown bg-white outline-none focus:border-coral placeholder:text-muted"
                 />
                 <button
                   onClick={() => removeIngredientRow(idx)}
-                  className="text-sm font-bold text-[#D4784A] bg-transparent border-none cursor-pointer px-1"
-                  style={{ fontSize: '18px' }}
+                  className="text-[18px] font-bold text-[#D4784A] bg-transparent border-none cursor-pointer px-0.5 flex-shrink-0"
                 >
                   ×
                 </button>

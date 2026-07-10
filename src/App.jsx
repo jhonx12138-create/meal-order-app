@@ -524,9 +524,29 @@ export default function App() {
       <CssBaseline />
       <AppContext.Provider value={ctx}>
         <div className="app-container">
-          {/* Header */}
-          <header className="flex items-center justify-between px-5 py-4 flex-shrink-0">
-            <h1 className="text-xl font-bold text-brown m-0">
+          {/* Header — with banner background on order page */}
+          <header
+            className="flex items-center justify-between px-5 py-4 flex-shrink-0 relative"
+            style={
+              activeTab === TABS.ORDER && banner
+                ? {
+                    backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.35)), url(${banner})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    minHeight: '100px',
+                    paddingTop: '20px',
+                    paddingBottom: '20px',
+                  }
+                : {}
+            }
+          >
+            <h1
+              className="text-xl font-bold m-0"
+              style={{
+                color: activeTab === TABS.ORDER && banner ? '#fff' : '#4A3728',
+                textShadow: activeTab === TABS.ORDER && banner ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
+              }}
+            >
               {TAB_TITLES[activeTab]}
             </h1>
             <div className="text-sm text-coral px-2 py-1 rounded-lg" />

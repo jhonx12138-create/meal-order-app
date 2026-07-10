@@ -3,7 +3,7 @@ import { useApp } from '../App';
 import DishCard from '../components/DishCard';
 
 export default function OrderPage() {
-  const { dishes, activeCategory, setActiveCategory, CATEGORIES, banner } = useApp();
+  const { dishes, activeCategory, setActiveCategory, CATEGORIES } = useApp();
 
   const filteredDishes =
     activeCategory === '全部'
@@ -12,18 +12,8 @@ export default function OrderPage() {
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Banner */}
-      {banner && (
-        <div className="px-5 pt-2 pb-2 flex-shrink-0">
-          <div
-            className="w-full aspect-[4/1] rounded-card bg-cover bg-center"
-            style={{ backgroundImage: `url(${banner})` }}
-          />
-        </div>
-      )}
-
       {/* Category Navigation */}
-      <div className="flex gap-2 overflow-x-auto px-5 pb-2 flex-shrink-0 hide-scrollbar">
+      <div className="flex gap-2 overflow-x-auto px-5 pt-3 pb-2 flex-shrink-0 hide-scrollbar">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
