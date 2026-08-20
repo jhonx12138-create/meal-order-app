@@ -13,26 +13,38 @@ const STORAGE_KEYS = {
   user: 'meal_app_user',
   banner: 'meal_app_banner',
   initialized: 'meal_app_initialized',
+  dataVersion: 'meal_app_data_version',
 };
 
+// 数据版本号：默认菜谱结构变更时 +1，触发老用户数据重置
+const DATA_VERSION = '2';
+
+function resetToDefaults() {
+  saveDishes(DEFAULT_DISHES);
+  saveCart({});
+  saveMeals([]);
+  saveOrders([]);
+  saveUser(DEFAULT_USER);
+  localStorage.setItem(STORAGE_KEYS.initialized, 'true');
+  localStorage.setItem(STORAGE_KEYS.dataVersion, DATA_VERSION);
+}
+
 /**
- * 初始化数据：首次使用时写入预置数据
+ * 初始化数据：首次使用或数据版本升级时写入预置数据
  */
 export function initializeData() {
   const isInitialized = localStorage.getItem(STORAGE_KEYS.initialized);
-  if (!isInitialized) {
-    saveDishes(DEFAULT_DISHES);
-    saveCart({});
-    saveMeals([]);
-    saveOrders([]);
-    saveUser(DEFAULT_USER);
-    localStorage.setItem(STORAGE_KEYS.initialized, 'true');
+  const savedVersion = localStorage.getItem(STORAGE_KEYS.dataVersion);
+
+  if (!isInitialized || savedVersion !== DATA_VERSION) {
+    resetToDefaults();
     return {
       dishes: DEFAULT_DISHES,
       cart: {},
       meals: [],
       orders: [],
       user: DEFAULT_USER,
+      banner: loadBanner(),
     };
   }
   return {
