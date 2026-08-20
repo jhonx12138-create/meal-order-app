@@ -92,8 +92,9 @@ const TAB_TITLES = {
 function categorizeIngredient(name) {
   for (const [cat, foods] of Object.entries(CAT_FOODS)) {
     if (foods.some((f) => name.includes(f))) {
-      if (cat === '肉肉' || cat === '早餐' || cat === '面面') return '肉类 / 主食';
+      if (cat === '肉肉') return '肉类';
       if (cat === '菜菜') return '蔬菜';
+      if (cat === '主食' || cat === '面面' || cat === '早餐') return '主食';
       if (cat === '果果' || cat === '甜甜') return '水果 / 零食';
       if (cat === '小药') return '其他';
     }
@@ -101,6 +102,25 @@ function categorizeIngredient(name) {
   const seasoningKeywords = ['油', '醋', '酱', '盐', '糖', '生抽', '老抽', '料酒', '蒜', '姜', '葱', '辣椒', '花椒', '八角', '桂皮', '味精', '鸡精', '蚝油', '番茄酱', '豆瓣酱', '胡椒粉', '五香粉'];
   if (seasoningKeywords.some((k) => name.includes(k))) return '调味料';
   return '其他';
+}
+
+// 采购清单分组展示顺序：肉类、蔬菜、主食优先，调味料放最后
+const CATEGORY_ORDER = ['肉类', '蔬菜', '主食', '水果 / 零食', '其他', '调味料'];
+
+// 兜底复制文本（clipboard API 不可用时）
+function fallbackCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand('copy');
+  } catch (e) {
+    /* ignore */
+  }
+  document.body.removeChild(textarea);
 }
 
 // ─── App Component ───────────────────────────────────────────
@@ -332,12 +352,21 @@ export default function App() {
       groups[cat].push({ name, amount: info.amount, dishes: info.dishes, checked: false });
     });
 
+    // 按优先级排序分组：肉类/蔬菜/主食优先，调味料最后
+    const sortedGroups = {};
+    CATEGORY_ORDER.forEach((cat) => {
+      if (groups[cat]) sortedGroups[cat] = groups[cat];
+    });
+    Object.keys(groups).forEach((cat) => {
+      if (!CATEGORY_ORDER.includes(cat)) sortedGroups[cat] = groups[cat];
+    });
+
     const orderId = 'o' + Date.now();
     const order = {
       id: orderId,
       date: new Date().toISOString().slice(0, 10),
       menu: [...menuNames],
-      groups,
+      groups: sortedGroups,
     };
 
     setOrders((prev) => [order, ...prev]);
@@ -395,10 +424,19 @@ export default function App() {
       });
       text += '\n来自「今天吃什么」APP';
 
-      if (navigator.share) {
-        navigator.share({ title: '今日菜单', text }).catch(() => {});
+      // 微信内 navigator.share 纯文本会报"不支持的格式"，改为复制到剪贴板，用户粘贴即可
+      const done = () => showToast('已复制，去微信粘贴即可');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(text)
+          .then(done)
+          .catch(() => {
+            fallbackCopy(text);
+            done();
+          });
       } else {
-        navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
+        fallbackCopy(text);
+        done();
       }
     },
     [orders, purchaseData, showToast]

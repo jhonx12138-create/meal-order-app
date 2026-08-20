@@ -111,7 +111,7 @@ export default function RecipeForm({ onSave }) {
       return;
     }
 
-    const finalCats = selectedCats.length > 0 ? selectedCats : ['菜菜'];
+    const finalCats = selectedCats.length > 0 ? selectedCats : ['小炒'];
 
     onSave({
       name: trimName,

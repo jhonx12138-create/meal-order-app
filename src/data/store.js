@@ -17,7 +17,7 @@ const STORAGE_KEYS = {
 };
 
 // 数据版本号：默认菜谱结构变更时 +1，触发老用户数据重置
-const DATA_VERSION = '2';
+const DATA_VERSION = '3';
 
 function resetToDefaults() {
   saveDishes(DEFAULT_DISHES);

@@ -4,7 +4,7 @@
  */
 
 // 分类标签
-export const CATEGORIES = ['全部', '早餐', '主食', '面面', '肉肉', '菜菜', '果果', '甜甜', '小药'];
+export const CATEGORIES = ['全部', '炖菜', '小炒', '凉菜', '主食', '酒水饮料'];
 
 // 分类食物映射（用于食材聚合分类）
 export const CAT_FOODS = {
@@ -36,7 +36,7 @@ export const DEFAULT_DISHES = [
       { name: '姜', amount: '3片' },
       { name: '八角', amount: '2个' },
     ],
-    categories: ['肉肉'],
+    categories: ['炖菜'],
     createdAt: new Date('2026-08-01').toISOString(),
   },
   {
@@ -52,7 +52,7 @@ export const DEFAULT_DISHES = [
       { name: '盐', amount: '适量' },
       { name: '香油', amount: '少许' },
     ],
-    categories: ['菜菜'],
+    categories: ['凉菜'],
     createdAt: new Date('2026-08-02').toISOString(),
   },
   {
@@ -67,7 +67,7 @@ export const DEFAULT_DISHES = [
       { name: '料酒', amount: '1勺' },
       { name: '姜', amount: '3片' },
     ],
-    categories: ['肉肉'],
+    categories: ['小炒'],
     createdAt: new Date('2026-08-03').toISOString(),
   },
   {
@@ -82,7 +82,7 @@ export const DEFAULT_DISHES = [
       { name: '香油', amount: '少许' },
       { name: '盐', amount: '适量' },
     ],
-    categories: ['菜菜'],
+    categories: ['凉菜'],
     createdAt: new Date('2026-08-04').toISOString(),
   },
   {
@@ -98,7 +98,7 @@ export const DEFAULT_DISHES = [
       { name: '料酒', amount: '1勺' },
       { name: '干辣椒', amount: '几个' },
     ],
-    categories: ['肉肉'],
+    categories: ['小炒'],
     createdAt: new Date('2026-08-05').toISOString(),
   },
   {
@@ -114,7 +114,7 @@ export const DEFAULT_DISHES = [
       { name: '盐', amount: '适量' },
       { name: '香油', amount: '少许' },
     ],
-    categories: ['菜菜'],
+    categories: ['凉菜'],
     createdAt: new Date('2026-08-06').toISOString(),
   },
   {
@@ -131,7 +131,7 @@ export const DEFAULT_DISHES = [
       { name: '姜', amount: '3片' },
       { name: '八角', amount: '2个' },
     ],
-    categories: ['肉肉'],
+    categories: ['炖菜'],
     createdAt: new Date('2026-08-07').toISOString(),
   },
   {
@@ -146,7 +146,7 @@ export const DEFAULT_DISHES = [
       { name: '盐', amount: '适量' },
       { name: '姜', amount: '2片' },
     ],
-    categories: ['菜菜'],
+    categories: ['小炒'],
     createdAt: new Date('2026-08-08').toISOString(),
   },
   {
@@ -160,7 +160,7 @@ export const DEFAULT_DISHES = [
       { name: '盐', amount: '适量' },
       { name: '糖', amount: '少许' },
     ],
-    categories: ['菜菜'],
+    categories: ['小炒'],
     createdAt: new Date('2026-08-09').toISOString(),
   },
   {
@@ -176,7 +176,7 @@ export const DEFAULT_DISHES = [
       { name: '蒜', amount: '3瓣' },
       { name: '生抽', amount: '1勺' },
     ],
-    categories: ['肉肉'],
+    categories: ['小炒'],
     createdAt: new Date('2026-08-10').toISOString(),
   },
   {
@@ -190,7 +190,7 @@ export const DEFAULT_DISHES = [
       { name: '盐', amount: '适量' },
       { name: '生抽', amount: '1勺' },
     ],
-    categories: ['菜菜'],
+    categories: ['小炒'],
     createdAt: new Date('2026-08-11').toISOString(),
   },
 ];
