@@ -48,8 +48,12 @@ export default function RecipeDetail() {
         </div>
 
         {/* Emoji / Image */}
-        <div className="w-full aspect-[16/10] rounded-card mb-4 dish-img-bg flex items-center justify-center text-[64px]">
-          {d.emoji || '🍽️'}
+        <div className="w-full aspect-[16/10] rounded-card mb-4 dish-img-bg flex items-center justify-center text-[64px] overflow-hidden">
+          {d.photo ? (
+            <img src={d.photo} alt={d.name} className="w-full h-full object-cover" />
+          ) : (
+            d.emoji || '🍽️'
+          )}
         </div>
 
         {/* Ingredients */}

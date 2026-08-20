@@ -44,8 +44,12 @@ export default function CartDrawer() {
           <>
             {cartItems.map((item) => (
               <div key={item.id} className="flex items-center py-3 border-b border-cream gap-3">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-3xl bg-cream flex-shrink-0">
-                  {item.emoji || '🍽️'}
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-3xl bg-cream flex-shrink-0 overflow-hidden">
+                  {item.photo ? (
+                    <img src={item.photo} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    item.emoji || '🍽️'
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-brown">{item.name}</div>

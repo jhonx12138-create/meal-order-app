@@ -24,8 +24,12 @@ export default function KitchenPage() {
               onClick={() => openRecipeDetail(dish)}
               className="flex items-center p-3 bg-white rounded-card mb-2 gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] cursor-pointer active:bg-[#faf7f2]"
             >
-              <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0">
-                {dish.emoji || '🍽️'}
+              <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
+                {dish.photo ? (
+                  <img src={dish.photo} alt={dish.name} className="w-full h-full object-cover" />
+                ) : (
+                  dish.emoji || '🍽️'
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-brown mb-0.5">{dish.name}</div>

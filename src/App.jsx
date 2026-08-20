@@ -153,9 +153,11 @@ export default function App() {
   useEffect(() => { if (banner) saveBanner(banner); }, [banner]);
 
   // ─── Toast ──────────────────────────────────────────────────
+  const toastTimer = useRef(null);
   const showToast = useCallback((msg) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(''), 1500);
+    toastTimer.current = setTimeout(() => setToastMsg(''), 1500);
   }, []);
 
   // ─── Cart Operations ────────────────────────────────────────
@@ -350,13 +352,30 @@ export default function App() {
     (orderId, catName, ingIdx) => {
       setPurchaseData((prev) => {
         if (!prev || prev.id !== orderId) return prev;
-        const next = { ...prev, groups: { ...prev.groups } };
-        next.groups = { ...next.groups };
-        next.groups[catName] = next.groups[catName].map((item, i) =>
-          i === ingIdx ? { ...item, checked: !item.checked } : item
-        );
-        return next;
+        return {
+          ...prev,
+          groups: {
+            ...prev.groups,
+            [catName]: prev.groups[catName].map((item, i) =>
+              i === ingIdx ? { ...item, checked: !item.checked } : item
+            ),
+          },
+        };
       });
+      setOrders((prev) =>
+        prev.map((o) => {
+          if (o.id !== orderId || !o.groups || !o.groups[catName]) return o;
+          return {
+            ...o,
+            groups: {
+              ...o.groups,
+              [catName]: o.groups[catName].map((item, i) =>
+                i === ingIdx ? { ...item, checked: !item.checked } : item
+              ),
+            },
+          };
+        })
+      );
     },
     []
   );

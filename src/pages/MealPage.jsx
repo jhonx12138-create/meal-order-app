@@ -7,7 +7,7 @@ import MealList from '../components/MealList';
  * Meal journal page with tabs for meals and order history
  */
 export default function MealPage() {
-  const { meals, orders } = useApp();
+  const { meals, orders, shareOrder } = useApp();
   const [activeTab, setActiveTab] = useState('meals'); // 'meals' | 'orders'
 
   return (
@@ -52,6 +52,7 @@ export default function MealPage() {
               status: '已下单',
             }))}
             showDelete={false}
+            onShare={shareOrder}
             emptyIcon="📋"
             emptyText="还没有历史订单"
           />
