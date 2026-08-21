@@ -99,7 +99,7 @@ function categorizeIngredient(name) {
       if (cat === '小药') return '其他';
     }
   }
-  const seasoningKeywords = ['油', '醋', '酱', '盐', '糖', '生抽', '老抽', '料酒', '蒜', '姜', '葱', '辣椒', '花椒', '八角', '桂皮', '味精', '鸡精', '蚝油', '番茄酱', '豆瓣酱', '胡椒粉', '五香粉'];
+  const seasoningKeywords = ['油', '醋', '酱', '盐', '糖', '生抽', '老抽', '料酒', '蒜', '姜', '葱', '辣椒', '花椒', '八角', '桂皮', '味精', '鸡精', '蚝油', '番茄酱', '豆瓣酱', '胡椒粉', '五香粉', '咖喱', '底料'];
   if (seasoningKeywords.some((k) => name.includes(k))) return '调味料';
   return '其他';
 }
