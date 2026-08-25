@@ -82,9 +82,9 @@ const TABS = {
 };
 
 const TAB_TITLES = {
-  [TABS.ORDER]: '点菜',
+  [TABS.ORDER]: '我家小厨',
   [TABS.MEAL]: '食记',
-  [TABS.KITCHEN]: '厨房',
+  [TABS.KITCHEN]: '菜谱',
   [TABS.PROFILE]: '我的',
 };
 

@@ -1,11 +1,13 @@
 import React from 'react';
 import { useApp } from '../App';
 
+const ICON = (file) => import.meta.env.BASE_URL + 'icons/' + file;
+
 const tabConfig = [
-  { key: 'order', icon: '🍽️', label: '点菜' },
-  { key: 'meal', icon: '📄', label: '食记' },
-  { key: 'kitchen', icon: '🍳', label: '厨房' },
-  { key: 'profile', icon: '👤', label: '我的' },
+  { key: 'order', icon: ICON('order.png'), label: '点菜' },
+  { key: 'meal', icon: ICON('meal.png'), label: '食记' },
+  { key: 'kitchen', icon: ICON('recipe.png'), label: '菜谱' },
+  { key: 'profile', icon: ICON('profile.png'), label: '我的' },
 ];
 
 export default function TabBar() {
@@ -22,7 +24,12 @@ export default function TabBar() {
             className="flex flex-col items-center flex-1 py-1.5 gap-0.5 transition-colors duration-200 border-none bg-transparent cursor-pointer"
             style={{ color: isActive ? '#E88D5A' : '#C4B998' }}
           >
-            <span className="text-xl leading-none">{tab.icon}</span>
+            <img
+              src={tab.icon}
+              alt={tab.label}
+              className="w-7 h-7 object-contain"
+              style={{ opacity: isActive ? 1 : 0.55 }}
+            />
             <span className="text-[10px]">{tab.label}</span>
           </button>
         );

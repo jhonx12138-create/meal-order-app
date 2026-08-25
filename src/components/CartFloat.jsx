@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from '../App';
 
 /**
- * 悬浮点菜清单按钮
+ * 悬浮点菜清单按钮（左下角圆形 + 购物车图标 + 数量角标）
  * Floating cart button shown on order page
  */
 export default function CartFloat() {
@@ -13,11 +13,18 @@ export default function CartFloat() {
   return (
     <button
       onClick={() => setCartOpen(true)}
-      className="cart-float-pulse fixed bottom-[88px] left-1/2 z-10 flex items-center gap-2.5 px-6 py-3 rounded-[28px] text-white text-sm font-semibold cursor-pointer border-none transition-all duration-200 active:scale-95"
-      style={{ background: '#E88D5A', transform: 'translateX(-50%)', boxShadow: '0 4px 16px rgba(232,141,90,0.4)' }}
+      aria-label="打开点菜清单"
+      className="fixed bottom-[88px] left-4 z-10 w-14 h-14 rounded-full bg-[#E88D5A] text-white flex items-center justify-center border-none cursor-pointer transition-transform active:scale-95"
+      style={{ boxShadow: '0 4px 16px rgba(232,141,90,0.4)' }}
     >
-      <span>点菜清单</span>
-      <span className="bg-white text-coral rounded-xl px-2.5 py-0.5 text-[13px] min-w-[24px] text-center font-semibold">
+      {/* 购物车图标（SVG） */}
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="9" cy="21" r="1" />
+        <circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+      </svg>
+      {/* 数量角标 */}
+      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center font-semibold border-2 border-white">
         {cartCount}
       </span>
     </button>
