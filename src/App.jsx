@@ -593,6 +593,7 @@ export default function App() {
                     minHeight: '100px',
                     paddingTop: '20px',
                     paddingBottom: '20px',
+                    marginBottom: '16px',
                   }
                 : {}
             }
