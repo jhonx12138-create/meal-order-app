@@ -21,16 +21,16 @@ export default function TabBar() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className="flex flex-col items-center flex-1 py-1.5 gap-0.5 transition-colors duration-200 border-none bg-transparent cursor-pointer"
+            className="flex flex-col items-center flex-1 py-2.5 gap-1 transition-colors duration-200 border-none bg-transparent cursor-pointer"
             style={{ color: isActive ? '#E88D5A' : '#C4B998' }}
           >
             <img
               src={tab.icon}
               alt={tab.label}
-              className="w-7 h-7 object-contain"
+              className="w-10 h-10 object-contain"
               style={{ opacity: isActive ? 1 : 0.55 }}
             />
-            <span className="text-[10px]">{tab.label}</span>
+            <span className="text-[13px] font-medium leading-none">{tab.label}</span>
           </button>
         );
       })}
