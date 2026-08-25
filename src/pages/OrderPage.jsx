@@ -5,15 +5,41 @@ import DishCard from '../components/DishCard';
 export default function OrderPage() {
   const { dishes, activeCategory, setActiveCategory, CATEGORIES } = useApp();
 
-  const filteredDishes =
-    activeCategory === '全部'
-      ? dishes
-      : dishes.filter((d) => d.categories && d.categories.includes(activeCategory));
+  const isAll = activeCategory === '全部';
+
+  // 菜品统一按上传时间倒序排序
+  const sortedDishes = [...dishes].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  // 展示用分类顺序（排除「全部」）
+  const orderedCategories = CATEGORIES.filter((cat) => cat !== '全部');
+
+  // 生成展示区块：全部时按分类顺序分组（空分类不渲染）；单分类时仅该分类
+  const sections = isAll
+    ? orderedCategories
+        .map((cat) => ({
+          cat,
+          items: sortedDishes.filter(
+            (d) => d.categories && d.categories.includes(cat)
+          ),
+        }))
+        .filter((section) => section.items.length > 0)
+    : [
+        {
+          cat: activeCategory,
+          items: sortedDishes.filter(
+            (d) => d.categories && d.categories.includes(activeCategory)
+          ),
+        },
+      ];
+
+  const isEmpty = isAll ? dishes.length === 0 : sections[0].items.length === 0;
 
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* 左侧分类边栏 */}
-      <div className="w-[76px] flex-shrink-0 overflow-y-auto bg-cream/30 border-r border-cream hide-scrollbar">
+      <div className="w-[92px] flex-shrink-0 overflow-y-auto bg-cream/30 border-r border-cream hide-scrollbar">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat;
           return (
@@ -37,21 +63,30 @@ export default function OrderPage() {
 
       {/* 右侧菜品区 */}
       <div className="flex-1 overflow-y-auto px-3 pb-4 hide-scrollbar">
-        {filteredDishes.length === 0 ? (
+        {isEmpty ? (
           <div className="flex flex-col items-center justify-center py-16 px-5 text-center">
             <div className="text-[64px] mb-3">🍽️</div>
             <div className="text-sm text-brown-light mb-4">
-              {activeCategory === '全部'
+              {isAll
                 ? '还没有菜谱，去菜谱添加一道吧'
                 : `"${activeCategory}"分类下还没有菜谱`}
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {filteredDishes.map((dish) => (
-              <DishCard key={dish.id} dish={dish} />
-            ))}
-          </div>
+          sections.map((section) => (
+            <div key={section.cat} className="mb-4">
+              {isAll && (
+                <div className="text-[13px] font-semibold text-brown mb-2">
+                  {section.cat}
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                {section.items.map((dish) => (
+                  <DishCard key={dish.id} dish={dish} />
+                ))}
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

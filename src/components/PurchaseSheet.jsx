@@ -46,6 +46,23 @@ export default function PurchaseSheet() {
           {date} 菜单
         </div>
 
+        {/* 今日菜单 */}
+        <div className="text-[13px] font-semibold text-brown mb-2">今日菜单</div>
+        <div className="flex flex-wrap gap-2">
+          {menu.map((name) => (
+            <span
+              key={name}
+              className="px-3 py-1 rounded text-[13px]"
+              style={{ background: '#F5ECE1', color: '#8B7355' }}
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+
+        {/* 采购清单 */}
+        <div className="text-[13px] font-semibold text-brown mb-2 mt-4">采购清单</div>
+
         {/* Ingredient Groups */}
         {Object.entries(groups).map(([catName, items]) => (
           <div key={catName} className="mb-4">
@@ -68,11 +85,6 @@ export default function PurchaseSheet() {
             ))}
           </div>
         ))}
-
-        {/* Menu Summary */}
-        <div className="p-3 bg-cream rounded-[10px] mt-3 text-xs text-brown-light leading-relaxed">
-          <b className="text-brown">今日菜单：</b>{menu.join('、')}
-        </div>
 
         {/* Actions */}
         <div className="flex gap-3 mt-4">
