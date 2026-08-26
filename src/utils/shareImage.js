@@ -4,7 +4,7 @@
  *
  * 提供两个函数：
  *  - buildShareText(order)：生成可复制到微信的纯文本
- *  - generateShareImage(order)：用离屏 canvas 把订单渲染成暖色卡片图，返回 dataURL
+ *  - generateShareImage(order, banner)：用离屏 canvas 把订单渲染成暖色卡片图，可选叠加首页头图，返回 dataURL
  */
 
 // 统一的字体栈，与全局 theme 保持一致
@@ -53,11 +53,29 @@ function roundRectPath(ctx, x, y, w, h, r) {
 }
 
 /**
+ * 异步加载图片；加载失败或传入非法地址时返回 null
+ * @param {string} src 图片地址（dataURL 或普通 URL）
+ * @returns {Promise<HTMLImageElement | null>}
+ */
+function loadImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+/**
  * 生成订单分享卡片图
  * @param {object} order 订单对象
+ * @param {string|null} [banner] 可选首页头图 dataURL；为空或加载失败时回退到无头图样式
  * @returns {Promise<string>} 解析为 PNG dataURL
  */
-export function generateShareImage(order) {
+export async function generateShareImage(order, banner) {
+  // 先异步加载头图；为空或加载失败时 bannerImg 为 null，后续自动回退
+  const bannerImg = banner ? await loadImage(banner) : null;
+
   return new Promise((resolve) => {
     const WIDTH = 750; // 2x 画布，对应逻辑宽 375px
     const PADDING = 40; // 左右内边距
@@ -76,7 +94,21 @@ export function generateShareImage(order) {
     ctx.fillStyle = '#FFFAF5';
     ctx.fillRect(0, 0, WIDTH, canvas.height);
 
-    let y = 44; // 顶部内边距
+    // ── 顶部头图（可选）──
+    const BANNER_HEIGHT = 240; // banner 展示高度，铺满 750 宽
+    let y;
+    if (bannerImg) {
+      // cover 裁切绘制 banner：保持宽高比并铺满
+      const scale = Math.max(WIDTH / bannerImg.width, BANNER_HEIGHT / bannerImg.height);
+      const sw = WIDTH / scale;
+      const sh = BANNER_HEIGHT / scale;
+      const sx = (bannerImg.width - sw) / 2;
+      const sy = (bannerImg.height - sh) / 2;
+      ctx.drawImage(bannerImg, sx, sy, sw, sh, 0, 0, WIDTH, BANNER_HEIGHT);
+      y = BANNER_HEIGHT + 30; // banner 下留白
+    } else {
+      y = 44; // 顶部内边距（无 banner 时保持原样）
+    }
 
     // ── 顶部主标题 ──
     ctx.font = `bold 44px ${FONT_FAMILY}`;

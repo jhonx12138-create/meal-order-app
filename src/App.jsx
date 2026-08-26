@@ -404,13 +404,13 @@ export default function App() {
       const order = orders.find((o) => o.id === orderId) || purchaseData;
       if (!order) return;
 
-      generateShareImage(order).then((dataURL) => {
+      generateShareImage(order, banner).then((dataURL) => {
         setShareImage(dataURL);
         setShareOrderData(order);
         setShareImageOpen(true);
       });
     },
-    [orders, purchaseData]
+    [orders, purchaseData, banner]
   );
 
   // ─── Purchase: save to meals ────────────────────────────────
