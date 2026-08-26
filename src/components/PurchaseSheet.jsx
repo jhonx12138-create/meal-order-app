@@ -7,7 +7,7 @@ import { useApp } from '../App';
  * Purchase list sheet showing aggregated ingredients grouped by category
  */
 export default function PurchaseSheet() {
-  const { purchaseOpen, setPurchaseOpen, purchaseData, togglePurchaseCheck, shareOrder, openMealForm } = useApp();
+  const { purchaseOpen, setPurchaseOpen, purchaseData, togglePurchaseCheck, shareOrder } = useApp();
 
   if (!purchaseData) return null;
 
@@ -92,14 +92,7 @@ export default function PurchaseSheet() {
             onClick={() => shareOrder(id)}
             className="flex-1 py-3 rounded-btn text-sm font-semibold cursor-pointer bg-white text-coral border-[1.5px] border-coral"
           >
-            分享
-          </button>
-          <button
-            onClick={() => openMealForm(id)}
-            className="flex-1 py-3 rounded-btn text-sm font-semibold cursor-pointer border-none text-white"
-            style={{ background: '#E88D5A' }}
-          >
-            记入食记
+            分享采购清单
           </button>
         </div>
       </div>

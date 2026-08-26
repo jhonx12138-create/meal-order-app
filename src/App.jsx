@@ -363,6 +363,7 @@ export default function App() {
     };
 
     setOrders((prev) => [order, ...prev]);
+    setCart({});
 
     setPurchaseData(order);
     setCartOpen(false);
@@ -450,9 +451,6 @@ export default function App() {
         },
         ...prev,
       ]);
-      setCart({});
-      setPurchaseOpen(false);
-      setPurchaseData(null);
       setMealFormOpen(false);
       setMealFormOrder(null);
       showToast('已记入食记');

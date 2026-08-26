@@ -14,7 +14,7 @@ const STATUS_MAP = {
  * 食记：时间线样式（回忆向）；历史订单：状态流转 + 复用 + 分享（效率向）
  */
 export default function MealPage() {
-  const { meals, orders, shareOrder, deleteOrder, reuseOrder, togglePurchaseCheck } = useApp();
+  const { meals, orders, shareOrder, deleteOrder, reuseOrder, togglePurchaseCheck, openMealForm } = useApp();
   const [activeTab, setActiveTab] = useState('meals'); // 'meals' | 'orders'
   const [expandedId, setExpandedId] = useState(null);
 
@@ -110,6 +110,12 @@ export default function MealPage() {
                       className="text-xs text-coral-dark bg-transparent border-none cursor-pointer p-0"
                     >
                       再点一次
+                    </button>
+                    <button
+                      onClick={() => openMealForm(order.id)}
+                      className="text-xs text-coral-dark bg-transparent border-none cursor-pointer p-0"
+                    >
+                      记入食记
                     </button>
                     <button
                       onClick={() => shareOrder(order.id)}
