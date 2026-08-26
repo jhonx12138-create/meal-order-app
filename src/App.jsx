@@ -19,6 +19,8 @@ import ProfilePage from './pages/ProfilePage';
 import CartFloat from './components/CartFloat';
 import CartDrawer from './components/CartDrawer';
 import PurchaseSheet from './components/PurchaseSheet';
+import ShareImageSheet from './components/ShareImageSheet';
+import { generateShareImage } from './utils/shareImage';
 import RecipeForm from './components/RecipeForm';
 import RecipeDetail from './components/RecipeDetail';
 import SearchPage from './components/SearchPage';
@@ -107,25 +109,6 @@ function categorizeIngredient(name) {
 // 采购清单分组展示顺序：肉类、蔬菜、主食优先，调味料放最后
 const CATEGORY_ORDER = ['肉类', '蔬菜', '主食', '水果 / 零食', '其他', '调味料'];
 
-// 兜底复制文本（clipboard API 不可用时），返回是否成功
-function fallbackCopy(text) {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.style.position = 'fixed';
-  textarea.style.opacity = '0';
-  document.body.appendChild(textarea);
-  textarea.focus();
-  textarea.select();
-  let ok = false;
-  try {
-    ok = document.execCommand('copy');
-  } catch (e) {
-    ok = false;
-  }
-  document.body.removeChild(textarea);
-  return ok;
-}
-
 // ─── App Component ───────────────────────────────────────────
 export default function App() {
   // ─── State ──────────────────────────────────────────────────
@@ -144,6 +127,9 @@ export default function App() {
   const [purchaseOpen, setPurchaseOpen] = useState(false);
   const [purchaseData, setPurchaseData] = useState(null);
   const [recipeFormOpen, setRecipeFormOpen] = useState(false);
+  const [shareImage, setShareImage] = useState(null);
+  const [shareImageOpen, setShareImageOpen] = useState(false);
+  const [shareOrderData, setShareOrderData] = useState(null);
   const [editingDish, setEditingDish] = useState(null);
   const [recipeDetailOpen, setRecipeDetailOpen] = useState(false);
   const [detailDish, setDetailDish] = useState(null);
@@ -418,45 +404,13 @@ export default function App() {
       const order = orders.find((o) => o.id === orderId) || purchaseData;
       if (!order) return;
 
-      let text = `今日菜单：\n${order.menu.map((m) => '  · ' + m).join('\n')}\n\n采购清单：\n`;
-      Object.entries(order.groups).forEach(([cat, items]) => {
-        text += `【${cat}】\n`;
-        items.forEach((item) => {
-          text += `  ${item.checked ? '✓' : '□'} ${item.name} ${item.amount}\n`;
-        });
+      generateShareImage(order).then((dataURL) => {
+        setShareImage(dataURL);
+        setShareOrderData(order);
+        setShareImageOpen(true);
       });
-      text += '\n来自「今天吃什么」APP';
-
-      // 优先使用 Web Share API（微信内对纯文本分享支持不佳）
-      const copyToClipboard = () => {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          return navigator.clipboard
-            .writeText(text)
-            .then(() => true)
-            .catch(() => fallbackCopy(text));
-        }
-        return Promise.resolve(fallbackCopy(text));
-      };
-
-      const doCopyFallback = () => {
-        copyToClipboard().then((ok) => {
-          showToast(
-            ok ? '已复制到剪贴板，去微信粘贴即可' : '复制失败，请长按手动复制'
-          );
-        });
-      };
-
-      if (navigator.share) {
-        try {
-          navigator.share({ title: '今日菜单', text }).catch(() => doCopyFallback());
-        } catch (e) {
-          doCopyFallback();
-        }
-      } else {
-        doCopyFallback();
-      }
     },
-    [orders, purchaseData, showToast]
+    [orders, purchaseData]
   );
 
   // ─── Purchase: save to meals ────────────────────────────────
@@ -566,6 +520,10 @@ export default function App() {
     purchaseData,
     togglePurchaseCheck,
     shareOrder,
+    shareImage,
+    shareImageOpen,
+    setShareImageOpen,
+    shareOrderData,
     saveOrderToMeals,
     // Recipe form
     recipeFormOpen,
@@ -644,6 +602,7 @@ export default function App() {
           {/* Overlays / Dialogs */}
           <CartDrawer />
           <PurchaseSheet />
+          <ShareImageSheet />
           <RecipeForm onSave={handleRecipeSave} />
           <RecipeDetail />
           <SearchPage />
