@@ -7,7 +7,7 @@ import { useApp } from '../App';
  * Purchase list sheet showing aggregated ingredients grouped by category
  */
 export default function PurchaseSheet() {
-  const { purchaseOpen, setPurchaseOpen, purchaseData, togglePurchaseCheck, shareOrder, saveOrderToMeals } = useApp();
+  const { purchaseOpen, setPurchaseOpen, purchaseData, togglePurchaseCheck, shareOrder, openMealForm } = useApp();
 
   if (!purchaseData) return null;
 
@@ -95,11 +95,11 @@ export default function PurchaseSheet() {
             分享
           </button>
           <button
-            onClick={() => saveOrderToMeals(id)}
+            onClick={() => openMealForm(id)}
             className="flex-1 py-3 rounded-btn text-sm font-semibold cursor-pointer border-none text-white"
             style={{ background: '#E88D5A' }}
           >
-            保存到食记
+            记入食记
           </button>
         </div>
       </div>

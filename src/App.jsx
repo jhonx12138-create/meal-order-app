@@ -20,6 +20,7 @@ import CartFloat from './components/CartFloat';
 import CartDrawer from './components/CartDrawer';
 import PurchaseSheet from './components/PurchaseSheet';
 import ShareImageSheet from './components/ShareImageSheet';
+import MealForm from './components/MealForm';
 import { generateShareImage } from './utils/shareImage';
 import RecipeForm from './components/RecipeForm';
 import RecipeDetail from './components/RecipeDetail';
@@ -130,6 +131,8 @@ export default function App() {
   const [shareImage, setShareImage] = useState(null);
   const [shareImageOpen, setShareImageOpen] = useState(false);
   const [shareOrderData, setShareOrderData] = useState(null);
+  const [mealFormOpen, setMealFormOpen] = useState(false);
+  const [mealFormOrder, setMealFormOrder] = useState(null);
   const [editingDish, setEditingDish] = useState(null);
   const [recipeDetailOpen, setRecipeDetailOpen] = useState(false);
   const [detailDish, setDetailDish] = useState(null);
@@ -356,6 +359,7 @@ export default function App() {
       date: new Date().toISOString().slice(0, 10),
       menu: [...menuNames],
       groups: sortedGroups,
+      status: 'pending',
     };
 
     setOrders((prev) => [order, ...prev]);
@@ -383,15 +387,19 @@ export default function App() {
       setOrders((prev) =>
         prev.map((o) => {
           if (o.id !== orderId || !o.groups || !o.groups[catName]) return o;
-          return {
-            ...o,
-            groups: {
-              ...o.groups,
-              [catName]: o.groups[catName].map((item, i) =>
-                i === ingIdx ? { ...item, checked: !item.checked } : item
-              ),
-            },
+          const newGroups = {
+            ...o.groups,
+            [catName]: o.groups[catName].map((item, i) =>
+              i === ingIdx ? { ...item, checked: !item.checked } : item
+            ),
           };
+          // 状态流转：全勾选=已完成，部分勾选=采购中，未勾=待采购
+          const items = Object.values(newGroups).flat();
+          const done = items.filter((i) => i.checked).length;
+          let status = 'pending';
+          if (items.length > 0 && done === items.length) status = 'done';
+          else if (done > 0) status = 'purchasing';
+          return { ...o, groups: newGroups, status };
         })
       );
     },
@@ -413,12 +421,21 @@ export default function App() {
     [orders, purchaseData, banner]
   );
 
-  // ─── Purchase: save to meals ────────────────────────────────
-  const saveOrderToMeals = useCallback(
+  // ─── Meal Form (save order as meal) ─────────────────────────
+  const openMealForm = useCallback(
     (orderId) => {
       const order = orders.find((o) => o.id === orderId) || purchaseData;
       if (!order) return;
+      setMealFormOrder(order);
+      setMealFormOpen(true);
+    },
+    [orders, purchaseData]
+  );
 
+  const handleMealSave = useCallback(
+    (mealData) => {
+      const order = mealFormOrder;
+      if (!order) return;
       setMeals((prev) => [
         {
           id: 'm' + Date.now(),
@@ -426,16 +443,50 @@ export default function App() {
           menu: order.menu,
           ingredientGroups: order.groups,
           status: 'purchased',
+          rating: mealData.rating || 0,
+          comment: mealData.comment || '',
+          who: mealData.who || '',
+          photo: mealData.photo || null,
         },
         ...prev,
       ]);
-
       setCart({});
       setPurchaseOpen(false);
       setPurchaseData(null);
-      showToast('已保存到食记');
+      setMealFormOpen(false);
+      setMealFormOrder(null);
+      showToast('已记入食记');
     },
-    [orders, purchaseData, showToast]
+    [mealFormOrder, showToast]
+  );
+
+  // ─── Order Operations ───────────────────────────────────────
+  const deleteOrder = useCallback(
+    (orderId) => {
+      if (window.confirm('确定要删除这条订单吗？')) {
+        setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        showToast('已删除');
+      }
+    },
+    [showToast]
+  );
+
+  const reuseOrder = useCallback(
+    (orderId) => {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) return;
+      setCart((prev) => {
+        const next = { ...prev };
+        order.menu.forEach((name) => {
+          const dish = dishes.find((d) => d.name === name);
+          if (dish && !next[dish.id]) next[dish.id] = 1;
+        });
+        return next;
+      });
+      setActiveTab(TABS.ORDER);
+      showToast('已加入点菜清单');
+    },
+    [orders, dishes, showToast]
   );
 
   // ─── Meal Operations ────────────────────────────────────────
@@ -524,7 +575,12 @@ export default function App() {
     shareImageOpen,
     setShareImageOpen,
     shareOrderData,
-    saveOrderToMeals,
+    mealFormOpen,
+    setMealFormOpen,
+    openMealForm,
+    handleMealSave,
+    deleteOrder,
+    reuseOrder,
     // Recipe form
     recipeFormOpen,
     setRecipeFormOpen,
@@ -603,6 +659,7 @@ export default function App() {
           <CartDrawer />
           <PurchaseSheet />
           <ShareImageSheet />
+          <MealForm />
           <RecipeForm onSave={handleRecipeSave} />
           <RecipeDetail />
           <SearchPage />
