@@ -42,7 +42,7 @@ export default function MealPage() {
             borderColor: activeTab === 'orders' ? '#E88D5A' : 'transparent',
           }}
         >
-          历史订单
+          订单
         </button>
       </div>
 
@@ -60,7 +60,11 @@ export default function MealPage() {
             {sortedOrders.map((order) => {
               const st = STATUS_MAP[order.status] || STATUS_MAP.pending;
               const expanded = expandedId === order.id;
-              const items = Object.values(order.groups || {}).flat();
+              // 调味料为家中常备，不参与勾选与进度统计
+              const catEntries = Object.entries(order.groups || {}).filter(
+                ([c]) => c !== '调味料'
+              );
+              const items = catEntries.flatMap(([, arr]) => arr);
               const doneCount = items.filter((i) => i.checked).length;
               return (
                 <div
@@ -111,12 +115,18 @@ export default function MealPage() {
                     >
                       再点一次
                     </button>
-                    <button
-                      onClick={() => openMealForm(order.id)}
-                      className="text-xs text-coral-dark bg-transparent border-none cursor-pointer p-0"
-                    >
-                      记入食记
-                    </button>
+                    {order.mealSaved ? (
+                      <span className="text-xs" style={{ color: '#7BC67E' }}>
+                        已记食记 ✓
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => openMealForm(order.id)}
+                        className="text-xs text-coral-dark bg-transparent border-none cursor-pointer p-0"
+                      >
+                        记入食记
+                      </button>
+                    )}
                     <button
                       onClick={() => shareOrder(order.id)}
                       className="text-xs text-coral-dark bg-transparent border-none cursor-pointer p-0"
@@ -137,23 +147,37 @@ export default function MealPage() {
                       {Object.entries(order.groups || {}).map(([catName, catItems]) => (
                         <div key={catName} className="mb-3">
                           <div className="text-xs font-semibold text-coral mb-1.5">{catName}</div>
-                          {catItems.map((item, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center justify-between py-1 border-b border-cream text-[13px] text-brown"
-                            >
-                              <span
-                                className="flex items-center gap-2 cursor-pointer"
-                                onClick={() => togglePurchaseCheck(order.id, catName, idx)}
+                          {catItems.map((item, idx) =>
+                            catName === '调味料' ? (
+                              /* 调味料家中常备：只展示，不勾选 */
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between py-1 border-b border-cream text-[13px] text-brown"
                               >
-                                <span style={{ color: item.checked ? '#7BC67E' : '#C4B998' }}>
-                                  {item.checked ? '✓' : '□'}
+                                <span className="flex items-center gap-2">
+                                  <span className="text-xs text-muted">·</span>
+                                  {item.name}
                                 </span>
-                                {item.name}
-                              </span>
-                              <span className="text-xs text-brown-light">{item.amount}</span>
-                            </div>
-                          ))}
+                                <span className="text-xs text-muted">{item.amount}</span>
+                              </div>
+                            ) : (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between py-1 border-b border-cream text-[13px] text-brown"
+                              >
+                                <span
+                                  className="flex items-center gap-2 cursor-pointer"
+                                  onClick={() => togglePurchaseCheck(order.id, catName, idx)}
+                                >
+                                  <span style={{ color: item.checked ? '#7BC67E' : '#C4B998' }}>
+                                    {item.checked ? '✓' : '□'}
+                                  </span>
+                                  {item.name}
+                                </span>
+                                <span className="text-xs text-brown-light">{item.amount}</span>
+                              </div>
+                            )
+                          )}
                         </div>
                       ))}
                     </div>

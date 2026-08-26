@@ -7,7 +7,7 @@ import { useApp } from '../App';
  * Purchase list sheet showing aggregated ingredients grouped by category
  */
 export default function PurchaseSheet() {
-  const { purchaseOpen, setPurchaseOpen, purchaseData, togglePurchaseCheck, shareOrder } = useApp();
+  const { purchaseOpen, setPurchaseOpen, purchaseData, togglePurchaseCheck, shareOrder, showToast } = useApp();
 
   if (!purchaseData) return null;
 
@@ -93,6 +93,16 @@ export default function PurchaseSheet() {
             className="flex-1 py-3 rounded-btn text-sm font-semibold cursor-pointer bg-white text-coral border-[1.5px] border-coral"
           >
             分享采购清单
+          </button>
+          <button
+            onClick={() => {
+              setPurchaseOpen(false);
+              showToast('订单已生成，可在「订单」查看');
+            }}
+            className="flex-1 py-3 rounded-btn text-sm font-semibold cursor-pointer border-none text-white"
+            style={{ background: '#E88D5A' }}
+          >
+            生成订单
           </button>
         </div>
       </div>

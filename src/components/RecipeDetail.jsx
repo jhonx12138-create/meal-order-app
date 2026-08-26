@@ -13,7 +13,12 @@ export default function RecipeDetail() {
     detailDish,
     handleDetailEdit,
     handleDetailDelete,
+    activeTab,
+    TABS,
   } = useApp();
+
+  // 点菜页打开详情为只读（不显示编辑/删除）
+  const readOnly = activeTab === TABS.ORDER;
 
   if (!detailDish) return null;
 
@@ -84,22 +89,24 @@ export default function RecipeDetail() {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex gap-3 mt-4">
-          <button
-            onClick={handleDetailEdit}
-            className="flex-1 py-2.5 rounded-btn text-sm font-semibold cursor-pointer bg-white text-coral border-[1.5px] border-coral"
-          >
-            编辑
-          </button>
-          <button
-            onClick={handleDetailDelete}
-            className="flex-1 py-2.5 rounded-btn text-sm font-semibold cursor-pointer border-none text-white"
-            style={{ background: '#E24B4A' }}
-          >
-            删除
-          </button>
-        </div>
+        {/* Actions（点菜页只读时隐藏编辑/删除） */}
+        {!readOnly && (
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={handleDetailEdit}
+              className="flex-1 py-2.5 rounded-btn text-sm font-semibold cursor-pointer bg-white text-coral border-[1.5px] border-coral"
+            >
+              编辑
+            </button>
+            <button
+              onClick={handleDetailDelete}
+              className="flex-1 py-2.5 rounded-btn text-sm font-semibold cursor-pointer border-none text-white"
+              style={{ background: '#E24B4A' }}
+            >
+              删除
+            </button>
+          </div>
+        )}
       </div>
     </Drawer>
   );

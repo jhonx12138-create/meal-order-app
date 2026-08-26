@@ -394,8 +394,10 @@ export default function App() {
               i === ingIdx ? { ...item, checked: !item.checked } : item
             ),
           };
-          // 状态流转：全勾选=已完成，部分勾选=采购中，未勾=待采购
-          const items = Object.values(newGroups).flat();
+          // 状态流转（调味料常备不参与统计）：全勾选=已完成，部分=采购中，未勾=待采购
+          const items = Object.entries(newGroups)
+            .filter(([c]) => c !== '调味料')
+            .flatMap(([, arr]) => arr);
           const done = items.filter((i) => i.checked).length;
           let status = 'pending';
           if (items.length > 0 && done === items.length) status = 'done';
@@ -440,6 +442,7 @@ export default function App() {
       setMeals((prev) => [
         {
           id: 'm' + Date.now(),
+          orderId: order.id,
           date: order.date,
           menu: order.menu,
           ingredientGroups: order.groups,
@@ -451,6 +454,10 @@ export default function App() {
         },
         ...prev,
       ]);
+      // 标记对应订单已记入食记
+      setOrders((prev) =>
+        prev.map((o) => (o.id === order.id ? { ...o, mealSaved: true } : o))
+      );
       setMealFormOpen(false);
       setMealFormOrder(null);
       showToast('已记入食记');
