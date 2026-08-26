@@ -72,10 +72,6 @@ export default function MealList({ meals, emptyIcon = '📖', emptyText = '还�
 
             {/* 和谁吃 */}
             {meal.who && <div className="text-[11px] text-muted mt-1">👨‍👩‍👧 {meal.who}</div>}
-
-            <div className="text-[11px] text-green mt-1">
-              {meal.status === 'purchased' ? '食材已采购 ✓' : meal.status}
-            </div>
           </div>
         </div>
       ))}
