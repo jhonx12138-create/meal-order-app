@@ -12,7 +12,7 @@ import {
   resolveBanner,
   DEFAULT_BANNER_ID,
 } from './data/store';
-import { CATEGORIES, CAT_FOODS, DEFAULT_USER } from './data/defaults';
+import { CATEGORIES, CAT_FOODS, DEFAULT_USER, BUILTIN_DISHES } from './data/defaults';
 import TabBar from './components/TabBar';
 import OrderPage from './pages/OrderPage';
 import MealPage from './pages/MealPage';
@@ -138,6 +138,8 @@ export default function App() {
   const [editingDish, setEditingDish] = useState(null);
   const [recipeDetailOpen, setRecipeDetailOpen] = useState(false);
   const [detailDish, setDetailDish] = useState(null);
+  // 详情只读标记：内置菜单等来源禁止编辑/删除
+  const [detailReadonly, setDetailReadonly] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
   // ─── Init ───────────────────────────────────────────────────
@@ -293,8 +295,9 @@ export default function App() {
   );
 
   // ─── Recipe Detail ──────────────────────────────────────────
-  const openRecipeDetail = useCallback((dish) => {
+  const openRecipeDetail = useCallback((dish, readonly = false) => {
     setDetailDish(dish);
+    setDetailReadonly(!!readonly);
     setRecipeDetailOpen(true);
   }, []);
 
@@ -310,8 +313,25 @@ export default function App() {
       deleteDish(detailDish.id);
       setRecipeDetailOpen(false);
       setDetailDish(null);
+      setDetailReadonly(false);
     }
   }, [detailDish, deleteDish]);
+
+  // ─── Builtin Menu ──────────────────────────────────────────
+  // 从内置菜单挑选菜品 → 复制进个人菜单（生成新 id，不污染内置菜单）
+  const addBuiltinToPersonal = useCallback(
+    (builtinDish) => {
+      const { id, createdAt, ...rest } = builtinDish;
+      const newDish = {
+        id: 'd' + Date.now(),
+        ...rest,
+        createdAt: new Date().toISOString(),
+      };
+      setDishes((prev) => [newDish, ...prev]);
+      showToast('已加入个人菜单');
+    },
+    [showToast]
+  );
 
   // ─── Checkout ───────────────────────────────────────────────
   const checkout = useCallback(() => {
@@ -554,6 +574,7 @@ export default function App() {
     TABS,
     TAB_TITLES,
     CATEGORIES,
+    BUILTIN_DISHES,
     // Derived
     cartCount,
     cartItems,
@@ -600,9 +621,12 @@ export default function App() {
     recipeDetailOpen,
     setRecipeDetailOpen,
     detailDish,
+    detailReadonly,
     openRecipeDetail,
     handleDetailEdit,
     handleDetailDelete,
+    // Builtin menu
+    addBuiltinToPersonal,
     // Search
     searchOpen,
     setSearchOpen,

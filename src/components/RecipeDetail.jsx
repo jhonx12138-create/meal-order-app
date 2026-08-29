@@ -11,14 +11,16 @@ export default function RecipeDetail() {
     recipeDetailOpen,
     setRecipeDetailOpen,
     detailDish,
+    detailReadonly,
     handleDetailEdit,
     handleDetailDelete,
+    addBuiltinToPersonal,
     activeTab,
     TABS,
   } = useApp();
 
-  // 点菜页打开详情为只读（不显示编辑/删除）
-  const readOnly = activeTab === TABS.ORDER;
+  // 点菜页 / 内置菜单打开详情为只读（不显示编辑/删除）
+  const readOnly = activeTab === TABS.ORDER || detailReadonly;
 
   if (!detailDish) return null;
 
@@ -89,7 +91,7 @@ export default function RecipeDetail() {
           </div>
         )}
 
-        {/* Actions（点菜页只读时隐藏编辑/删除） */}
+        {/* Actions（点菜页/内置菜单只读时隐藏编辑/删除） */}
         {!readOnly && (
           <div className="flex gap-3 mt-4">
             <button
@@ -106,6 +108,20 @@ export default function RecipeDetail() {
               删除
             </button>
           </div>
+        )}
+
+        {/* 内置菜单详情只读：提供「加入个人菜单」 */}
+        {detailReadonly && (
+          <button
+            onClick={() => {
+              addBuiltinToPersonal(d);
+              setRecipeDetailOpen(false);
+            }}
+            className="w-full mt-4 py-3 rounded-btn text-white text-sm font-semibold cursor-pointer border-none"
+            style={{ background: '#E88D5A' }}
+          >
+            + 加入个人菜单
+          </button>
         )}
       </div>
     </Drawer>
