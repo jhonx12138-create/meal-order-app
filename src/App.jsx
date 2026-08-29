@@ -9,6 +9,8 @@ import {
   saveOrders,
   saveUser,
   saveBanner,
+  resolveBanner,
+  DEFAULT_BANNER_ID,
 } from './data/store';
 import { CATEGORIES, CAT_FOODS, DEFAULT_USER } from './data/defaults';
 import TabBar from './components/TabBar';
@@ -118,7 +120,7 @@ export default function App() {
   const [meals, setMeals] = useState([]);
   const [orders, setOrders] = useState([]);
   const [user, setUser] = useState(DEFAULT_USER);
-  const [banner, setBanner] = useState(null);
+  const [banner, setBanner] = useState(`builtin:${DEFAULT_BANNER_ID}`);
   const [activeTab, setActiveTab] = useState(TABS.ORDER);
   const [activeCategory, setActiveCategory] = useState('全部');
   const [toastMsg, setToastMsg] = useState('');
@@ -146,7 +148,8 @@ export default function App() {
     setMeals(data.meals);
     setOrders(data.orders);
     setUser(data.user);
-    setBanner(data.banner);
+    // 未设置过头图时使用默认内置头图
+    setBanner(data.banner || `builtin:${DEFAULT_BANNER_ID}`);
   }, []);
 
   // ─── Persistence ────────────────────────────────────────────
@@ -415,7 +418,7 @@ export default function App() {
       const order = orders.find((o) => o.id === orderId) || purchaseData;
       if (!order) return;
 
-      generateShareImage(order, banner).then((dataURL) => {
+      generateShareImage(order, resolveBanner(banner)).then((dataURL) => {
         setShareImage(dataURL);
         setShareOrderData(order);
         setShareImageOpen(true);
@@ -621,9 +624,9 @@ export default function App() {
           <header
             className="flex items-center justify-between px-5 py-4 flex-shrink-0 relative"
             style={
-              activeTab === TABS.ORDER && banner
+              activeTab === TABS.ORDER && resolveBanner(banner)
                 ? {
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.35)), url(${banner})`,
+                    backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.35)), url(${resolveBanner(banner)})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     minHeight: '100px',
@@ -637,8 +640,8 @@ export default function App() {
             <h1
               className="text-xl font-bold m-0"
               style={{
-                color: activeTab === TABS.ORDER && banner ? '#fff' : '#4A3728',
-                textShadow: activeTab === TABS.ORDER && banner ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
+                color: activeTab === TABS.ORDER && resolveBanner(banner) ? '#fff' : '#4A3728',
+                textShadow: activeTab === TABS.ORDER && resolveBanner(banner) ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
               }}
             >
               {TAB_TITLES[activeTab]}

@@ -1,12 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Drawer from '@mui/material/Drawer';
 import { useApp } from '../App';
+import { BUILTIN_BANNERS, resolveBanner } from '../data/store';
 
 export default function ProfilePage() {
   const { user, updateUser, banner, updateBanner } = useApp();
 
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const [bannerSheetOpen, setBannerSheetOpen] = useState(false);
+  const fileInputRef = useRef(null);
 
   const openEdit = useCallback((field, currentValue) => {
     setEditField(field);
@@ -36,15 +39,31 @@ export default function ProfilePage() {
 
   const handleBannerUpload = useCallback((e) => {
     const file = e.target.files[0];
+    e.target.value = ''; // 允许再次选择同一文件
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (evt) => {
       updateBanner(evt.target.result);
+      setBannerSheetOpen(false);
     };
     reader.readAsDataURL(file);
   }, [updateBanner]);
 
+  const pickBuiltin = useCallback((id) => {
+    updateBanner(`builtin:${id}`);
+    setBannerSheetOpen(false);
+  }, [updateBanner]);
+
   const avatarOptions = ['🦊', '🐱', '🐶', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🦄', '🐙', '🦀', '🦋', '🌸'];
+
+  // 当前选中的内置 id（用于高亮）
+  const currentBuiltinId = (() => {
+    if (typeof banner === 'string' && banner.startsWith('builtin:')) {
+      return parseInt(banner.slice('builtin:'.length), 10);
+    }
+    return null;
+  })();
+  const previewSrc = resolveBanner(banner);
 
   return (
     <div className="flex-1 overflow-y-auto px-5 pt-5 pb-4 hide-scrollbar">
@@ -90,26 +109,26 @@ export default function ProfilePage() {
         <span className="text-base text-muted">›</span>
       </div>
 
-      <label className="flex justify-between items-center py-4 border-b border-cream text-sm text-brown cursor-pointer">
+      <div
+        onClick={() => setBannerSheetOpen(true)}
+        className="flex justify-between items-center py-4 border-b border-cream text-sm text-brown cursor-pointer"
+      >
         <span>首页头图</span>
         <span className="flex items-center gap-2">
-          {banner ? (
-            <span className="text-xs text-coral">已设置</span>
+          {currentBuiltinId ? (
+            <span className="text-xs text-coral">内置 {currentBuiltinId}</span>
           ) : (
-            <span className="text-xs text-muted">未设置</span>
+            <span className="text-xs text-coral">已自定义</span>
           )}
           <span className="text-base text-muted">›</span>
         </span>
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleBannerUpload}
-        />
-      </label>
+      </div>
 
-      {banner && (
-        <div className="mt-2 mb-2 rounded-card overflow-hidden aspect-[4/1] bg-cover bg-center" style={{ backgroundImage: `url(${banner})` }} />
+      {previewSrc && (
+        <div
+          className="mt-2 mb-2 rounded-card overflow-hidden aspect-[4/1] bg-cover bg-center"
+          style={{ backgroundImage: `url(${previewSrc})` }}
+        />
       )}
 
       <div className="flex justify-between items-center py-4 border-b border-cream text-sm text-brown">
@@ -205,6 +224,89 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
+        </div>
+      </Drawer>
+
+      {/* 头图选择弹层 */}
+      <Drawer
+        anchor="bottom"
+        open={bannerSheetOpen}
+        onClose={() => setBannerSheetOpen(false)}
+        PaperProps={{
+          sx: {
+            maxWidth: 430,
+            mx: 'auto',
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            bgcolor: '#fff',
+          },
+        }}
+      >
+        <div className="px-5 pt-5 pb-6">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-[17px] font-semibold text-brown m-0">选择首页头图</h2>
+            <button
+              onClick={() => setBannerSheetOpen(false)}
+              className="text-xl text-muted bg-transparent border-none cursor-pointer p-1"
+            >
+              ×
+            </button>
+          </div>
+          <p className="text-xs text-muted mb-4">5 张内置头图（不会随你的操作减少），也可上传自定义</p>
+
+          {/* 内置头图网格 */}
+          <div className="grid grid-cols-1 gap-2 mb-4">
+            {BUILTIN_BANNERS.map((b) => {
+              const selected = currentBuiltinId === b.id;
+              return (
+                <div
+                  key={b.id}
+                  onClick={() => pickBuiltin(b.id)}
+                  className="relative rounded-card overflow-hidden cursor-pointer border-2"
+                  style={{
+                    borderColor: selected ? '#E88D5A' : 'transparent',
+                    aspectRatio: '4 / 1',
+                    backgroundImage: `url(${b.src})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                >
+                  {selected && (
+                    <div
+                      className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[11px] text-white"
+                      style={{ background: '#E88D5A' }}
+                    >
+                      当前
+                    </div>
+                  )}
+                  <div
+                    className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[11px] text-white"
+                    style={{ background: 'rgba(0,0,0,0.45)' }}
+                  >
+                    {b.name}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 自定义上传 */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-card border-[1.5px] border-dashed border-cream-dark py-4 text-center cursor-pointer mb-3"
+            style={{ borderColor: currentBuiltinId == null ? '#E88D5A' : '#E5D9C8' }}
+          >
+            <div className="text-2xl mb-1">📷</div>
+            <div className="text-sm text-brown">上传自定义头图</div>
+            <div className="text-[11px] text-muted mt-1">支持 jpg / png，建议 4:1 横幅</div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleBannerUpload}
+          />
         </div>
       </Drawer>
     </div>

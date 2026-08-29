@@ -127,6 +127,35 @@ export function saveUser(user) {
   localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
 }
 
+/** 内置头图（不随用户动作删减） */
+export const BUILTIN_BANNERS = [
+  { id: 1, name: '暖阳小厨', src: 'banners/banner1.png' },
+  { id: 2, name: '奶白甜点', src: 'banners/banner2.png' },
+  { id: 3, name: '窗边午餐', src: 'banners/banner3.png' },
+  { id: 4, name: '粉色蛋糕', src: 'banners/banner4.png' },
+  { id: 5, name: '橙汁时光', src: 'banners/banner5.png' },
+];
+
+/** 默认头图 id（当前在用的头图） */
+export const DEFAULT_BANNER_ID = 1;
+
+/** 把存储的 banner 值解析为可用的 url 字符串
+ *  - 'builtin:N'  → 对应内置头图路径
+ *  - dataURL      → 原样返回（用户上传）
+ *  - null         → 返回默认内置头图路径
+ */
+export function resolveBanner(banner) {
+  if (!banner) {
+    return BUILTIN_BANNERS[DEFAULT_BANNER_ID - 1].src;
+  }
+  if (typeof banner === 'string' && banner.startsWith('builtin:')) {
+    const id = parseInt(banner.slice('builtin:'.length), 10);
+    const found = BUILTIN_BANNERS.find((b) => b.id === id);
+    if (found) return found.src;
+  }
+  return banner;
+}
+
 /** 头图 (Banner) */
 export function loadBanner() {
   try {
