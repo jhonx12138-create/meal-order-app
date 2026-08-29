@@ -637,15 +637,38 @@ export default function App() {
                 : {}
             }
           >
-            <h1
-              className="text-xl font-bold m-0"
-              style={{
-                color: activeTab === TABS.ORDER && resolveBanner(banner) ? '#fff' : '#4A3728',
-                textShadow: activeTab === TABS.ORDER && resolveBanner(banner) ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
-              }}
-            >
-              {TAB_TITLES[activeTab]}
-            </h1>
+            {/* 点菜页标题 = 厨房名称（超4字换行），其余页用固定标题 */}
+            {activeTab === TABS.ORDER ? (
+              <h1
+                className="m-0 flex flex-col justify-center"
+                style={{
+                  color: '#fff',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+                  lineHeight: 1.25,
+                }}
+              >
+                {(() => {
+                  const name = (user.kitchenName || '我家小厨').trim();
+                  if (name.length > 4) {
+                    return (
+                      <span className="text-[22px] font-bold leading-snug text-center">
+                        {name.slice(0, 4)}
+                        <br />
+                        {name.slice(4)}
+                      </span>
+                    );
+                  }
+                  return <span className="text-xl font-bold">{name}</span>;
+                })()}
+              </h1>
+            ) : (
+              <h1
+                className="text-xl font-bold m-0"
+                style={{ color: '#4A3728' }}
+              >
+                {TAB_TITLES[activeTab]}
+              </h1>
+            )}
             <div className="text-sm text-coral px-2 py-1 rounded-lg" />
           </header>
 

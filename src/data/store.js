@@ -117,9 +117,20 @@ export function saveOrders(orders) {
 export function loadUser() {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.user);
-    return data || DEFAULT_USER;
+    if (!data) return { ...DEFAULT_USER };
+    let parsed;
+    try {
+      parsed = JSON.parse(data);
+    } catch {
+      parsed = {};
+    }
+    // 迁移：旧默认「我的厨房」→ 新默认「我家小厨」
+    if (!parsed.kitchenName || parsed.kitchenName === '我的厨房') {
+      parsed.kitchenName = DEFAULT_USER.kitchenName;
+    }
+    return { ...DEFAULT_USER, ...parsed };
   } catch {
-    return DEFAULT_USER;
+    return { ...DEFAULT_USER };
   }
 }
 

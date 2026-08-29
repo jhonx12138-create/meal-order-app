@@ -508,5 +508,5 @@ export const DEFAULT_DISHES = [
 export const DEFAULT_USER = {
   nickname: '今天吃什么呀',
   avatar: '🦊',
-  kitchenName: '我的厨房',
+  kitchenName: '我家小厨',
 };
