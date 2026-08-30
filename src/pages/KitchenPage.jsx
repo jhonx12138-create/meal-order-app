@@ -36,7 +36,11 @@ export default function KitchenPage() {
   // 个人菜单已有菜名集合（系统菜库「已加入」提示）
   const addedNames = new Set(dishes.map((d) => d.name));
 
-  // 系统菜库数据：随分类筛选，未加入个人菜单的优先展示
+  // 系统菜库数据：随分类筛选；按固定分类顺序排序（不随「已加入」状态变化，保证操作后列表稳定不跳动）
+  const catOrder = {};
+  CATEGORIES.forEach((c, i) => {
+    catOrder[c] = i;
+  });
   const builtinFiltered = (
     activeCat === '全部'
       ? BUILTIN_DISHES
@@ -45,9 +49,11 @@ export default function KitchenPage() {
         )
   )
     .slice()
-    .sort(
-      (a, b) => Number(addedNames.has(a.name)) - Number(addedNames.has(b.name))
-    );
+    .sort((a, b) => {
+      const ca = catOrder[a.categories?.[0]] ?? 999;
+      const cb = catOrder[b.categories?.[0]] ?? 999;
+      return ca - cb;
+    });
 
   // 个人菜单数据
   const personalFiltered =
@@ -141,14 +147,14 @@ export default function KitchenPage() {
                         addBuiltinToPersonal(dish);
                       }
                     }}
-                    className="px-3 py-1.5 rounded-tag text-[12px] font-semibold cursor-pointer border-none whitespace-nowrap z-10"
+                    className="min-w-[88px] px-2 py-1.5 rounded-tag text-[12px] font-semibold cursor-pointer border-none whitespace-nowrap z-10 text-center"
                     style={
                       alreadyAdded
                         ? { background: '#F5ECE1', color: '#E88D5A' }
                         : { background: '#E88D5A', color: '#fff' }
                     }
                   >
-                    {alreadyAdded ? '已加入 ✓' : '加入'}
+                    {alreadyAdded ? '移出我的菜单' : '加入我的菜单'}
                   </button>
                 </div>
               );
@@ -156,14 +162,15 @@ export default function KitchenPage() {
           )}
         </div>
 
-        {/* 底部汇总条 */}
-        <div className="px-5 pt-2 pb-3 flex-shrink-0 safe-bottom">
-          <div
-            className="w-full py-2.5 rounded-full text-center text-[12px] font-semibold"
+        {/* 底部汇总条：可点击返回我的菜单 */}
+        <div className="px-5 pt-2 pb-2 flex-shrink-0 safe-bottom">
+          <button
+            onClick={() => setInLibrary(false)}
+            className="w-full py-2.5 rounded-full text-center text-[12px] font-semibold cursor-pointer border-none"
             style={{ background: '#F5ECE1', color: '#E88D5A' }}
           >
-            已加入 {addedCount} 道 · 返回即回到我的菜单
-          </div>
+            已加入 {addedCount} 道菜 · 点击返回即回到我的菜单
+          </button>
         </div>
       </div>
     );
@@ -245,7 +252,7 @@ export default function KitchenPage() {
       </div>
 
       {/* 底部双按钮：手动添加 / 从系统菜单导入 */}
-      <div className="px-5 pt-2 pb-3 flex gap-3 flex-shrink-0 safe-bottom">
+      <div className="px-5 pt-2 pb-2 flex gap-3 flex-shrink-0 safe-bottom">
         <button
           onClick={openAddRecipe}
           className="flex-1 py-3.5 rounded-btn text-white text-[15px] font-semibold cursor-pointer border-none"
