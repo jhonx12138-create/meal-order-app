@@ -88,7 +88,7 @@ const TABS = {
 
 const TAB_TITLES = {
   [TABS.ORDER]: '我家小厨',
-  [TABS.MEAL]: '食记',
+  [TABS.MEAL]: '订单',
   [TABS.KITCHEN]: '菜谱',
   [TABS.PROFILE]: '我的',
 };

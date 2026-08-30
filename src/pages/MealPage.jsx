@@ -15,25 +15,15 @@ const STATUS_MAP = {
  */
 export default function MealPage() {
   const { meals, orders, shareOrder, deleteOrder, reuseOrder, togglePurchaseCheck, openMealForm } = useApp();
-  const [activeTab, setActiveTab] = useState('meals'); // 'meals' | 'orders'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'meals'（进入页面优先展示订单）
   const [expandedId, setExpandedId] = useState(null);
 
   const sortedOrders = [...orders].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Tab switcher */}
+      {/* Tab switcher：订单优先 */}
       <div className="flex px-5 mb-4 flex-shrink-0">
-        <button
-          onClick={() => setActiveTab('meals')}
-          className="flex-1 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer bg-transparent"
-          style={{
-            color: activeTab === 'meals' ? '#E88D5A' : '#C4B998',
-            borderColor: activeTab === 'meals' ? '#E88D5A' : 'transparent',
-          }}
-        >
-          食记
-        </button>
         <button
           onClick={() => setActiveTab('orders')}
           className="flex-1 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer bg-transparent"
@@ -43,6 +33,16 @@ export default function MealPage() {
           }}
         >
           订单
+        </button>
+        <button
+          onClick={() => setActiveTab('meals')}
+          className="flex-1 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer bg-transparent"
+          style={{
+            color: activeTab === 'meals' ? '#E88D5A' : '#C4B998',
+            borderColor: activeTab === 'meals' ? '#E88D5A' : 'transparent',
+          }}
+        >
+          食记
         </button>
       </div>
 

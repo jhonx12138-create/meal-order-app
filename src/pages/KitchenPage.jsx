@@ -21,16 +21,21 @@ export default function KitchenPage() {
 
   const cats = CATEGORIES.filter((c) => c !== '全部');
 
-  // 内置 tab 数据：随分类筛选
-  const builtinFiltered =
+  // 个人菜单已有菜名集合（用于「已加入」提示）
+  const addedNames = new Set(dishes.map((d) => d.name));
+
+  // 内置 tab 数据：随分类筛选，未加入个人菜单的优先展示
+  const builtinFiltered = (
     activeCat === '全部'
       ? BUILTIN_DISHES
       : BUILTIN_DISHES.filter(
           (d) => d.categories && d.categories.includes(activeCat)
-        );
-
-  // 个人菜单已有菜名集合（用于「已加入」提示）
-  const addedNames = new Set(dishes.map((d) => d.name));
+        )
+  )
+    .slice()
+    .sort(
+      (a, b) => Number(addedNames.has(a.name)) - Number(addedNames.has(b.name))
+    );
 
   // 个人 tab 数据
   const personalFiltered =
@@ -140,14 +145,14 @@ export default function KitchenPage() {
                       if (!alreadyAdded) addBuiltinToPersonal(dish);
                     }}
                     disabled={alreadyAdded}
-                    className="px-3 py-1.5 rounded-tag text-xs font-semibold cursor-pointer border-none whitespace-nowrap"
+                    className="px-2.5 py-1.5 rounded-tag text-[11px] font-semibold cursor-pointer border-none whitespace-nowrap"
                     style={
                       alreadyAdded
                         ? { background: '#EDE3D4', color: '#A08B6F' }
                         : { background: '#E88D5A', color: '#fff' }
                     }
                   >
-                    {alreadyAdded ? '已加入 ✓' : '+ 加入'}
+                    {alreadyAdded ? '已加入个人菜单' : '加入个人菜单'}
                   </button>
                 ) : (
                   <span className="text-sm text-muted">›</span>

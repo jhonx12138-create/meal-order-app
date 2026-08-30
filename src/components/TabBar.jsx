@@ -5,7 +5,7 @@ const ICON = (file) => import.meta.env.BASE_URL + 'icons/' + file;
 
 const tabConfig = [
   { key: 'order', icon: ICON('order.png'), label: '点菜' },
-  { key: 'meal', icon: ICON('meal.png'), label: '食记' },
+  { key: 'meal', icon: ICON('meal.png'), label: '订单' },
   { key: 'kitchen', icon: ICON('recipe.png'), label: '菜谱' },
   { key: 'profile', icon: ICON('profile.png'), label: '我的' },
 ];
