@@ -22,9 +22,10 @@ export default function KitchenPage() {
   const [menuTab, setMenuTab] = useState('personal'); // 'personal' | 'builtin'
   const [activeCat, setActiveCat] = useState('全部');
 
-  // 从点菜页跳转过来时，默认选中点菜页的当前分类（一次性）
+  // 从点菜页跳转过来时，切到个人菜单 tab 并默认选中点菜页的当前分类（一次性）
   useEffect(() => {
     if (kitchenPendingCat) {
+      setMenuTab('personal');
       setActiveCat(kitchenPendingCat);
       setKitchenPendingCat(null);
     }
@@ -133,10 +134,10 @@ export default function KitchenPage() {
               <div
                 key={dish.id}
                 onClick={() => openRecipeDetail(dish, isBuiltin)}
-                className="flex items-center p-3 bg-white rounded-card mb-2 gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] cursor-pointer active:bg-[#faf7f2]"
+                className="relative flex items-center p-3 bg-white rounded-card mb-2 gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] cursor-pointer active:bg-[#faf7f2]"
               >
-                {/* 缩略图 + 已加入水印标识 */}
-                <div className="relative w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
+                {/* 缩略图 */}
+                <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
                   {dish.photo ? (
                     <img
                       src={dish.photo}
@@ -145,18 +146,6 @@ export default function KitchenPage() {
                     />
                   ) : (
                     dish.emoji || '🍽️'
-                  )}
-                  {isBuiltin && (
-                    <span
-                      className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[10px] leading-none"
-                      style={
-                        alreadyAdded
-                          ? { background: 'rgba(123,198,126,0.92)', color: '#fff' }
-                          : { background: 'rgba(196,185,152,0.75)', color: '#fff' }
-                      }
-                    >
-                      {alreadyAdded ? '✓' : '+'}
-                    </span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -167,6 +156,29 @@ export default function KitchenPage() {
                     {(dish.categories || []).join(' · ') || '未分类'}
                   </div>
                 </div>
+                {/* 系统菜单：行中央水印标识是否已加入个人菜单 */}
+                {isBuiltin && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span
+                      className="px-3 py-1 rounded-full text-[11px] font-bold border-[1.5px] -rotate-12"
+                      style={
+                        alreadyAdded
+                          ? {
+                              color: 'rgba(123,198,126,0.95)',
+                              borderColor: 'rgba(123,198,126,0.65)',
+                              background: 'rgba(255,255,255,0.75)',
+                            }
+                          : {
+                              color: 'rgba(196,185,152,0.9)',
+                              borderColor: 'rgba(196,185,152,0.55)',
+                              background: 'rgba(255,255,255,0.75)',
+                            }
+                      }
+                    >
+                      {alreadyAdded ? '已加入 ✓' : '未加入'}
+                    </span>
+                  </div>
+                )}
                 {isBuiltin ? (
                   <button
                     onClick={(e) => {
@@ -177,7 +189,7 @@ export default function KitchenPage() {
                         addBuiltinToPersonal(dish);
                       }
                     }}
-                    className="px-2.5 py-1.5 rounded-tag text-[11px] font-semibold cursor-pointer border-none whitespace-nowrap"
+                    className="px-2.5 py-1.5 rounded-tag text-[11px] font-semibold cursor-pointer border-none whitespace-nowrap z-10"
                     style={
                       alreadyAdded
                         ? { background: '#F5ECE1', color: '#E88D5A' }

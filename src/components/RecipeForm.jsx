@@ -277,7 +277,7 @@ export default function RecipeForm({ onSave }) {
             className="w-full py-3.5 rounded-btn text-white text-[15px] font-semibold cursor-pointer border-none"
             style={{ background: '#E88D5A' }}
           >
-            保存菜谱
+            保存菜品
           </button>
         </div>
       </div>

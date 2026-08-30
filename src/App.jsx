@@ -311,7 +311,7 @@ export default function App() {
   }, [detailDish, openEditRecipe]);
 
   const handleDetailDelete = useCallback(() => {
-    if (detailDish && window.confirm('确定要删除这个菜谱吗？')) {
+    if (detailDish && window.confirm('确定要删除这个菜品吗？')) {
       deleteDish(detailDish.id);
       setRecipeDetailOpen(false);
       setDetailDish(null);

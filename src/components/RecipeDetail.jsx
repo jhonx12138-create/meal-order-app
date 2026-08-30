@@ -14,17 +14,21 @@ export default function RecipeDetail() {
     detailReadonly,
     handleDetailEdit,
     handleDetailDelete,
+    dishes,
     addBuiltinToPersonal,
+    removeFromPersonal,
     activeTab,
     TABS,
   } = useApp();
 
-  // 点菜页 / 内置菜单打开详情为只读（不显示编辑/删除）
+  // 点菜页 / 系统菜单打开详情为只读（不显示编辑/删除）
   const readOnly = activeTab === TABS.ORDER || detailReadonly;
 
   if (!detailDish) return null;
 
   const d = detailDish;
+  // 系统菜单详情：该菜是否已在个人菜单
+  const alreadyAdded = dishes.some((x) => x.name === d.name);
 
   return (
     <Drawer
@@ -91,7 +95,7 @@ export default function RecipeDetail() {
           </div>
         )}
 
-        {/* Actions（点菜页/内置菜单只读时隐藏编辑/删除） */}
+        {/* Actions（点菜页/系统菜单只读时隐藏编辑/删除） */}
         {!readOnly && (
           <div className="flex gap-3 mt-4">
             <button
@@ -110,17 +114,25 @@ export default function RecipeDetail() {
           </div>
         )}
 
-        {/* 内置菜单详情只读：提供「加入个人菜单」 */}
+        {/* 系统菜单详情只读：加入 / 移出个人菜单 */}
         {detailReadonly && (
           <button
             onClick={() => {
-              addBuiltinToPersonal(d);
+              if (alreadyAdded) {
+                removeFromPersonal(d);
+              } else {
+                addBuiltinToPersonal(d);
+              }
               setRecipeDetailOpen(false);
             }}
-            className="w-full mt-4 py-3 rounded-btn text-white text-sm font-semibold cursor-pointer border-none"
-            style={{ background: '#E88D5A' }}
+            className="w-full mt-4 py-3 rounded-btn text-sm font-semibold cursor-pointer border-none"
+            style={
+              alreadyAdded
+                ? { background: '#F5ECE1', color: '#E88D5A' }
+                : { background: '#E88D5A', color: '#fff' }
+            }
           >
-            + 加入个人菜单
+            {alreadyAdded ? '移出个人菜单' : '加入个人菜单'}
           </button>
         )}
       </div>
