@@ -3,7 +3,7 @@ import { useApp } from '../App';
 import DishCard from '../components/DishCard';
 
 export default function OrderPage() {
-  const { dishes, activeCategory, setActiveCategory, CATEGORIES, setActiveTab, TABS } = useApp();
+  const { dishes, activeCategory, setActiveCategory, CATEGORIES, goToKitchen } = useApp();
 
   const isAll = activeCategory === '全部';
 
@@ -68,11 +68,11 @@ export default function OrderPage() {
             <div className="text-[64px] mb-3">🍽️</div>
             <div className="text-sm text-brown-light mb-4">
               {isAll
-                ? '还没有菜谱，去【菜谱】栏添加一道吧'
-                : `「${activeCategory}」分类下还没有菜谱`}
+                ? '还没有菜品，去【菜谱】栏添加一道吧'
+                : `「${activeCategory}」分类下还没有菜品`}
             </div>
             <button
-              onClick={() => setActiveTab(TABS.KITCHEN)}
+              onClick={() => goToKitchen(activeCategory)}
               className="px-5 py-2.5 rounded-btn text-sm font-semibold text-white cursor-pointer border-none"
               style={{ background: '#E88D5A' }}
             >

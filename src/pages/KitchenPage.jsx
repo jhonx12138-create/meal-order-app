@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../App';
 
 /**
  * 菜谱页面
  * Kitchen page with two tabs:
  *  - 个人菜单：用户自己的菜谱，可增删改
- *  - 内置菜单：只读内置菜库（88 道），可挑选加入个人菜单
+ *  - 系统菜单：只读系统菜库（88 道），可挑选加入 / 移出个人菜单
  */
 export default function KitchenPage() {
   const {
@@ -15,16 +15,27 @@ export default function KitchenPage() {
     CATEGORIES,
     BUILTIN_DISHES,
     addBuiltinToPersonal,
+    removeFromPersonal,
+    kitchenPendingCat,
+    setKitchenPendingCat,
   } = useApp();
   const [menuTab, setMenuTab] = useState('personal'); // 'personal' | 'builtin'
   const [activeCat, setActiveCat] = useState('全部');
+
+  // 从点菜页跳转过来时，默认选中点菜页的当前分类（一次性）
+  useEffect(() => {
+    if (kitchenPendingCat) {
+      setActiveCat(kitchenPendingCat);
+      setKitchenPendingCat(null);
+    }
+  }, [kitchenPendingCat, setKitchenPendingCat]);
 
   const cats = CATEGORIES.filter((c) => c !== '全部');
 
   // 个人菜单已有菜名集合（用于「已加入」提示）
   const addedNames = new Set(dishes.map((d) => d.name));
 
-  // 内置 tab 数据：随分类筛选，未加入个人菜单的优先展示
+  // 系统 tab 数据：随分类筛选，未加入个人菜单的优先展示
   const builtinFiltered = (
     activeCat === '全部'
       ? BUILTIN_DISHES
@@ -47,7 +58,7 @@ export default function KitchenPage() {
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Menu Tabs: 个人菜单 / 内置菜单 */}
+      {/* Menu Tabs: 个人菜单 / 系统菜单 */}
       <div className="px-5 mb-3 flex-shrink-0">
         <div className="flex p-1 rounded-full bg-[#F5ECE1]">
           <button
@@ -70,7 +81,7 @@ export default function KitchenPage() {
                 : { background: 'transparent', color: '#8B7355' }
             }
           >
-            内置菜单
+            系统菜单
           </button>
         </div>
       </div>
@@ -101,13 +112,18 @@ export default function KitchenPage() {
             <div className="text-[64px] mb-3">🍽️</div>
             <div className="text-sm text-brown-light mb-4">
               {menuTab === 'builtin' ? (
-                `「${activeCat}」分类下暂无内置菜`
+                `「${activeCat}」分类下暂无系统菜品`
               ) : activeCat === '全部' ? (
-                '还没有菜谱，添加一道吧'
+                '没有菜品'
               ) : (
-                `「${activeCat}」分类下还没有菜谱`
+                `「${activeCat}」分类下没有菜品`
               )}
             </div>
+            {menuTab === 'personal' && (
+              <div className="text-xs text-muted leading-relaxed max-w-[240px]">
+                可以点击下方按钮手动添加，或者从系统菜单中选择菜品添加
+              </div>
+            )}
           </div>
         ) : (
           listSource.map((dish) => {
@@ -119,7 +135,8 @@ export default function KitchenPage() {
                 onClick={() => openRecipeDetail(dish, isBuiltin)}
                 className="flex items-center p-3 bg-white rounded-card mb-2 gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] cursor-pointer active:bg-[#faf7f2]"
               >
-                <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
+                {/* 缩略图 + 已加入水印标识 */}
+                <div className="relative w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
                   {dish.photo ? (
                     <img
                       src={dish.photo}
@@ -128,6 +145,18 @@ export default function KitchenPage() {
                     />
                   ) : (
                     dish.emoji || '🍽️'
+                  )}
+                  {isBuiltin && (
+                    <span
+                      className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[10px] leading-none"
+                      style={
+                        alreadyAdded
+                          ? { background: 'rgba(123,198,126,0.92)', color: '#fff' }
+                          : { background: 'rgba(196,185,152,0.75)', color: '#fff' }
+                      }
+                    >
+                      {alreadyAdded ? '✓' : '+'}
+                    </span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -142,17 +171,20 @@ export default function KitchenPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!alreadyAdded) addBuiltinToPersonal(dish);
+                      if (alreadyAdded) {
+                        removeFromPersonal(dish);
+                      } else {
+                        addBuiltinToPersonal(dish);
+                      }
                     }}
-                    disabled={alreadyAdded}
                     className="px-2.5 py-1.5 rounded-tag text-[11px] font-semibold cursor-pointer border-none whitespace-nowrap"
                     style={
                       alreadyAdded
-                        ? { background: '#EDE3D4', color: '#A08B6F' }
+                        ? { background: '#F5ECE1', color: '#E88D5A' }
                         : { background: '#E88D5A', color: '#fff' }
                     }
                   >
-                    {alreadyAdded ? '已加入个人菜单' : '加入个人菜单'}
+                    {alreadyAdded ? '移出个人菜单' : '加入个人菜单'}
                   </button>
                 ) : (
                   <span className="text-sm text-muted">›</span>
@@ -171,7 +203,7 @@ export default function KitchenPage() {
             className="w-full py-3.5 rounded-btn text-white text-[15px] font-semibold cursor-pointer border-none"
             style={{ background: '#E88D5A' }}
           >
-            + 添加菜谱
+            + 添加菜品
           </button>
         </div>
       )}

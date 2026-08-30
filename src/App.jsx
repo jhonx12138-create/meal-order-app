@@ -138,8 +138,10 @@ export default function App() {
   const [editingDish, setEditingDish] = useState(null);
   const [recipeDetailOpen, setRecipeDetailOpen] = useState(false);
   const [detailDish, setDetailDish] = useState(null);
-  // 详情只读标记：内置菜单等来源禁止编辑/删除
+  // 详情只读标记：系统菜单等来源禁止编辑/删除
   const [detailReadonly, setDetailReadonly] = useState(false);
+  // 从点菜页跳转菜谱页时待应用的一次性分类（默认选中点菜时的当前分类）
+  const [kitchenPendingCat, setKitchenPendingCat] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
 
   // ─── Init ───────────────────────────────────────────────────
@@ -242,7 +244,7 @@ export default function App() {
         createdAt: new Date().toISOString(),
       };
       setDishes((prev) => [newDish, ...prev]);
-      showToast('菜谱已添加');
+      showToast('菜品已添加');
     },
     [showToast]
   );
@@ -252,7 +254,7 @@ export default function App() {
       setDishes((prev) =>
         prev.map((d) => (d.id === dishId ? { ...d, ...dishData } : d))
       );
-      showToast('菜谱已更新');
+      showToast('菜品已更新');
     },
     [showToast]
   );
@@ -317,8 +319,8 @@ export default function App() {
     }
   }, [detailDish, deleteDish]);
 
-  // ─── Builtin Menu ──────────────────────────────────────────
-  // 从内置菜单挑选菜品 → 复制进个人菜单（生成新 id，不污染内置菜单）
+  // ─── System Menu ───────────────────────────────────────────
+  // 从系统菜单挑选菜品 → 复制进个人菜单（生成新 id，不污染系统菜单）
   const addBuiltinToPersonal = useCallback(
     (builtinDish) => {
       const { id, createdAt, ...rest } = builtinDish;
@@ -332,6 +334,30 @@ export default function App() {
     },
     [showToast]
   );
+
+  // 从个人菜单移出系统菜品（按菜名匹配移除所有同名，并清理点菜清单）
+  const removeFromPersonal = useCallback(
+    (dish) => {
+      const targetIds = dishes
+        .filter((d) => d.name === dish.name)
+        .map((d) => d.id);
+      if (targetIds.length === 0) return;
+      setDishes((prev) => prev.filter((d) => !targetIds.includes(d.id)));
+      setCart((prev) => {
+        const next = { ...prev };
+        targetIds.forEach((id) => delete next[id]);
+        return next;
+      });
+      showToast('已移出个人菜单');
+    },
+    [dishes, showToast]
+  );
+
+  // 从点菜页跳转到菜谱页（个人菜单），并默认选中点菜时的当前分类
+  const goToKitchen = useCallback((cat) => {
+    setKitchenPendingCat(cat || '全部');
+    setActiveTab(TABS.KITCHEN);
+  }, []);
 
   // ─── Checkout ───────────────────────────────────────────────
   const checkout = useCallback(() => {
@@ -627,6 +653,10 @@ export default function App() {
     handleDetailDelete,
     // Builtin menu
     addBuiltinToPersonal,
+    removeFromPersonal,
+    goToKitchen,
+    kitchenPendingCat,
+    setKitchenPendingCat,
     // Search
     searchOpen,
     setSearchOpen,

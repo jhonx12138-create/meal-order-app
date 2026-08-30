@@ -148,7 +148,7 @@ export default function RecipeForm({ onSave }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-2 flex-shrink-0">
           <h2 className="text-[17px] font-semibold text-brown m-0">
-            {editingDish ? '编辑菜谱' : '添加菜谱'}
+            {editingDish ? '编辑菜品' : '添加菜品'}
           </h2>
           <button
             onClick={() => setRecipeFormOpen(false)}
