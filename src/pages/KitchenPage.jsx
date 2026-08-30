@@ -3,9 +3,9 @@ import { useApp } from '../App';
 
 /**
  * 菜谱页面
- * Kitchen page with two tabs:
- *  - 个人菜单：用户自己的菜谱，可增删改
- *  - 系统菜单：只读系统菜库（88 道），可挑选加入 / 移出个人菜单
+ * 主场景 = 个人菜单（我的菜单）
+ * 「从系统菜单导入」→ 进入系统菜库子页（返回式导航）
+ * 系统菜库是添加菜品的一种方式（进货仓库），不是与个人菜单并列的 tab
  */
 export default function KitchenPage() {
   const {
@@ -19,13 +19,13 @@ export default function KitchenPage() {
     kitchenPendingCat,
     setKitchenPendingCat,
   } = useApp();
-  const [menuTab, setMenuTab] = useState('personal'); // 'personal' | 'builtin'
+  const [inLibrary, setInLibrary] = useState(false); // false=个人菜单 / true=系统菜库
   const [activeCat, setActiveCat] = useState('全部');
 
-  // 从点菜页跳转过来时，切到个人菜单 tab 并默认选中点菜页的当前分类（一次性）
+  // 从点菜页跳转过来时，落在个人菜单并默认选中点菜页的当前分类（一次性）
   useEffect(() => {
     if (kitchenPendingCat) {
-      setMenuTab('personal');
+      setInLibrary(false);
       setActiveCat(kitchenPendingCat);
       setKitchenPendingCat(null);
     }
@@ -33,10 +33,10 @@ export default function KitchenPage() {
 
   const cats = CATEGORIES.filter((c) => c !== '全部');
 
-  // 个人菜单已有菜名集合（用于「已加入」提示）
+  // 个人菜单已有菜名集合（系统菜库「已加入」提示）
   const addedNames = new Set(dishes.map((d) => d.name));
 
-  // 系统 tab 数据：随分类筛选，未加入个人菜单的优先展示
+  // 系统菜库数据：随分类筛选，未加入个人菜单的优先展示
   const builtinFiltered = (
     activeCat === '全部'
       ? BUILTIN_DISHES
@@ -49,45 +49,136 @@ export default function KitchenPage() {
       (a, b) => Number(addedNames.has(a.name)) - Number(addedNames.has(b.name))
     );
 
-  // 个人 tab 数据
+  // 个人菜单数据
   const personalFiltered =
     activeCat === '全部'
       ? dishes
       : dishes.filter((d) => d.categories && d.categories.includes(activeCat));
 
-  const listSource = menuTab === 'personal' ? personalFiltered : builtinFiltered;
+  // ─── 系统菜库子页 ─────────────────────────────────
+  if (inLibrary) {
+    const addedCount = BUILTIN_DISHES.filter((d) => addedNames.has(d.name))
+      .length;
+    return (
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* 顶栏：返回 + 标题 */}
+        <div className="px-5 pt-4 pb-3 flex items-center gap-1 flex-shrink-0">
+          <button
+            onClick={() => setInLibrary(false)}
+            className="py-1 pr-2 text-[15px] font-semibold cursor-pointer border-none bg-transparent"
+            style={{ color: '#8B7355' }}
+          >
+            ‹ 返回
+          </button>
+          <div className="text-[16px] font-semibold text-brown">
+            系统菜库 · {BUILTIN_DISHES.length} 道
+          </div>
+        </div>
 
-  return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Menu Tabs: 个人菜单 / 系统菜单 */}
-      <div className="px-5 mb-3 flex-shrink-0">
-        <div className="flex p-1 rounded-full bg-[#F5ECE1]">
-          <button
-            onClick={() => setMenuTab('personal')}
-            className="flex-1 py-2 rounded-full text-[13px] font-semibold cursor-pointer border-none transition-colors"
-            style={
-              menuTab === 'personal'
-                ? { background: '#E88D5A', color: '#fff' }
-                : { background: 'transparent', color: '#8B7355' }
-            }
+        {/* 分类标签 */}
+        <div className="px-5 mb-3 flex-shrink-0">
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+            {['全部', ...cats].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCat(cat)}
+                className="px-3.5 py-1.5 rounded-tag text-[13px] cursor-pointer border-none whitespace-nowrap transition-colors"
+                style={{
+                  background: activeCat === cat ? '#E88D5A' : '#F5ECE1',
+                  color: activeCat === cat ? '#fff' : '#8B7355',
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 菜库列表 */}
+        <div className="flex-1 overflow-y-auto px-5 hide-scrollbar">
+          {builtinFiltered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-5 text-center">
+              <div className="text-[64px] mb-3">🍽️</div>
+              <div className="text-sm text-brown-light mb-4">
+                「{activeCat}」分类下暂无系统菜品
+              </div>
+            </div>
+          ) : (
+            builtinFiltered.map((dish) => {
+              const alreadyAdded = addedNames.has(dish.name);
+              return (
+                <div
+                  key={dish.id}
+                  onClick={() => openRecipeDetail(dish, true)}
+                  className="relative flex items-center p-3 bg-white rounded-card mb-2 gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] cursor-pointer active:bg-[#faf7f2]"
+                >
+                  {/* 缩略图 */}
+                  <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
+                    {dish.photo ? (
+                      <img
+                        src={dish.photo}
+                        alt={dish.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      dish.emoji || '🍽️'
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-brown mb-0.5">
+                      {dish.name}
+                    </div>
+                    <div className="text-[11px] text-muted">
+                      {(dish.categories || []).join(' · ') || '未分类'}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (alreadyAdded) {
+                        removeFromPersonal(dish);
+                      } else {
+                        addBuiltinToPersonal(dish);
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-tag text-[12px] font-semibold cursor-pointer border-none whitespace-nowrap z-10"
+                    style={
+                      alreadyAdded
+                        ? { background: '#F5ECE1', color: '#E88D5A' }
+                        : { background: '#E88D5A', color: '#fff' }
+                    }
+                  >
+                    {alreadyAdded ? '已加入 ✓' : '加入'}
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* 底部汇总条 */}
+        <div className="px-5 pt-2 pb-3 flex-shrink-0 safe-bottom">
+          <div
+            className="w-full py-2.5 rounded-full text-center text-[12px] font-semibold"
+            style={{ background: '#F5ECE1', color: '#E88D5A' }}
           >
-            个人菜单
-          </button>
-          <button
-            onClick={() => setMenuTab('builtin')}
-            className="flex-1 py-2 rounded-full text-[13px] font-semibold cursor-pointer border-none transition-colors"
-            style={
-              menuTab === 'builtin'
-                ? { background: '#E88D5A', color: '#fff' }
-                : { background: 'transparent', color: '#8B7355' }
-            }
-          >
-            系统菜单
-          </button>
+            已加入 {addedCount} 道 · 返回即回到我的菜单
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Category Tags */}
+  // ─── 个人菜单主视图 ───────────────────────────────
+  return (
+    <div className="flex flex-col flex-1 overflow-hidden">
+      {/* 标题行 */}
+      <div className="px-5 pt-4 pb-3 flex items-end justify-between flex-shrink-0">
+        <div className="text-[18px] font-semibold text-brown">我的菜单</div>
+        <div className="text-[12px] text-muted">{dishes.length} 道</div>
+      </div>
+
+      {/* 分类标签 */}
       <div className="px-5 mb-3 flex-shrink-0">
         <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
           {['全部', ...cats].map((cat) => (
@@ -106,119 +197,70 @@ export default function KitchenPage() {
         </div>
       </div>
 
-      {/* Recipe List */}
+      {/* 个人菜单列表 */}
       <div className="flex-1 overflow-y-auto px-5 hide-scrollbar">
-        {listSource.length === 0 ? (
+        {personalFiltered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-5 text-center">
             <div className="text-[64px] mb-3">🍽️</div>
             <div className="text-sm text-brown-light mb-4">
-              {menuTab === 'builtin' ? (
-                `「${activeCat}」分类下暂无系统菜品`
-              ) : activeCat === '全部' ? (
-                '没有菜品'
-              ) : (
-                `「${activeCat}」分类下没有菜品`
-              )}
+              {activeCat === '全部'
+                ? '没有菜品'
+                : `「${activeCat}」分类下没有菜品`}
             </div>
-            {menuTab === 'personal' && (
-              <div className="text-xs text-muted leading-relaxed max-w-[240px]">
-                可以点击下方按钮手动添加，或者从系统菜单中选择菜品添加
-              </div>
-            )}
+            <div className="text-xs text-muted leading-relaxed max-w-[240px]">
+              点击下方按钮手动添加，或从系统菜单导入菜品
+            </div>
           </div>
         ) : (
-          listSource.map((dish) => {
-            const isBuiltin = menuTab === 'builtin';
-            const alreadyAdded = isBuiltin && addedNames.has(dish.name);
-            return (
-              <div
-                key={dish.id}
-                onClick={() => openRecipeDetail(dish, isBuiltin)}
-                className="relative flex items-center p-3 bg-white rounded-card mb-2 gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] cursor-pointer active:bg-[#faf7f2]"
-              >
-                {/* 缩略图 */}
-                <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
-                  {dish.photo ? (
-                    <img
-                      src={dish.photo}
-                      alt={dish.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    dish.emoji || '🍽️'
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-brown mb-0.5">
-                    {dish.name}
-                  </div>
-                  <div className="text-[11px] text-muted">
-                    {(dish.categories || []).join(' · ') || '未分类'}
-                  </div>
-                </div>
-                {/* 系统菜单：行中央水印标识是否已加入个人菜单 */}
-                {isBuiltin && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span
-                      className="px-3 py-1 rounded-full text-[11px] font-bold border-[1.5px] -rotate-12"
-                      style={
-                        alreadyAdded
-                          ? {
-                              color: 'rgba(123,198,126,0.95)',
-                              borderColor: 'rgba(123,198,126,0.65)',
-                              background: 'rgba(255,255,255,0.75)',
-                            }
-                          : {
-                              color: 'rgba(196,185,152,0.9)',
-                              borderColor: 'rgba(196,185,152,0.55)',
-                              background: 'rgba(255,255,255,0.75)',
-                            }
-                      }
-                    >
-                      {alreadyAdded ? '已加入 ✓' : '未加入'}
-                    </span>
-                  </div>
-                )}
-                {isBuiltin ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (alreadyAdded) {
-                        removeFromPersonal(dish);
-                      } else {
-                        addBuiltinToPersonal(dish);
-                      }
-                    }}
-                    className="px-2.5 py-1.5 rounded-tag text-[11px] font-semibold cursor-pointer border-none whitespace-nowrap z-10"
-                    style={
-                      alreadyAdded
-                        ? { background: '#F5ECE1', color: '#E88D5A' }
-                        : { background: '#E88D5A', color: '#fff' }
-                    }
-                  >
-                    {alreadyAdded ? '移出个人菜单' : '加入个人菜单'}
-                  </button>
+          personalFiltered.map((dish) => (
+            <div
+              key={dish.id}
+              onClick={() => openRecipeDetail(dish, false)}
+              className="relative flex items-center p-3 bg-white rounded-card mb-2 gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.03)] cursor-pointer active:bg-[#faf7f2]"
+            >
+              {/* 缩略图 */}
+              <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center text-4xl bg-cream flex-shrink-0 overflow-hidden">
+                {dish.photo ? (
+                  <img
+                    src={dish.photo}
+                    alt={dish.name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <span className="text-sm text-muted">›</span>
+                  dish.emoji || '🍽️'
                 )}
               </div>
-            );
-          })
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-brown mb-0.5">
+                  {dish.name}
+                </div>
+                <div className="text-[11px] text-muted">
+                  {(dish.categories || []).join(' · ') || '未分类'}
+                </div>
+              </div>
+              <span className="text-sm text-muted">›</span>
+            </div>
+          ))
         )}
       </div>
 
-      {/* Add Button（仅个人菜单） */}
-      {menuTab === 'personal' && (
-        <div className="px-5 pb-3 flex-shrink-0 safe-bottom">
-          <button
-            onClick={openAddRecipe}
-            className="w-full py-3.5 rounded-btn text-white text-[15px] font-semibold cursor-pointer border-none"
-            style={{ background: '#E88D5A' }}
-          >
-            + 添加菜品
-          </button>
-        </div>
-      )}
+      {/* 底部双按钮：手动添加 / 从系统菜单导入 */}
+      <div className="px-5 pt-2 pb-3 flex gap-3 flex-shrink-0 safe-bottom">
+        <button
+          onClick={openAddRecipe}
+          className="flex-1 py-3.5 rounded-btn text-white text-[15px] font-semibold cursor-pointer border-none"
+          style={{ background: '#E88D5A' }}
+        >
+          ＋ 添加菜品
+        </button>
+        <button
+          onClick={() => setInLibrary(true)}
+          className="flex-1 py-3.5 rounded-btn text-[15px] font-semibold cursor-pointer border-none"
+          style={{ background: '#F5ECE1', color: '#E88D5A' }}
+        >
+          从系统菜单导入
+        </button>
+      </div>
     </div>
   );
 }
