@@ -148,7 +148,7 @@ export const BUILTIN_BANNERS = [
 ];
 
 /** 默认头图 id（当前在用的头图） */
-export const DEFAULT_BANNER_ID = 1;
+export const DEFAULT_BANNER_ID = 5;
 
 /** 把存储的 banner 值解析为可用的 url 字符串
  *  - 'builtin:N'  → 对应内置头图路径
